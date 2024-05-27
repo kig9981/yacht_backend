@@ -1,4 +1,4 @@
-package com.example.yacht_backend.Entity;
+package com.example.yacht_backend;
 
 import java.util.UUID;
 
