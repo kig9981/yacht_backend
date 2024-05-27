@@ -1,9 +1,11 @@
 package com.example.yacht_backend;
 
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -11,11 +13,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 public class ApiController {
-    
+    private final RoomRepository roomRepository;
+
+    ApiController(RoomRepository roomRepository) {
+        this.roomRepository = roomRepository;
+    }
 
     @GetMapping("/get-all-rooms")
-    public String getAllRooms(@RequestParam String param) {
-        return new String();
+    public List<Room> getAllRooms(@RequestParam String param) {
+        return roomRepository.findAll();
     }
 
     @PostMapping("/create-new-room")
