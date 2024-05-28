@@ -1,10 +1,14 @@
-package com.example.yacht_backend;
+package com.example.yacht_backend.controller;
 
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.yacht_backend.model.Room;
+import com.example.yacht_backend.service.ApiService;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 

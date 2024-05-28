@@ -1,8 +1,11 @@
-package com.example.yacht_backend;
+package com.example.yacht_backend.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+
+import com.example.yacht_backend.model.Room;
+import com.example.yacht_backend.repository.RoomRepository;
 
 @Service
 public class ApiService {
