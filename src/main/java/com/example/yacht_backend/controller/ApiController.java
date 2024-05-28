@@ -6,11 +6,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.yacht_backend.dto.CreateNewRoomRequest;
+import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.model.Room;
 import com.example.yacht_backend.service.ApiService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 
 
@@ -28,10 +31,10 @@ public class ApiController {
     }
 
     @PostMapping("/create-new-room")
-    public String createNewRoom(@RequestBody String entity) {
-        //TODO: process POST request
+    public CreateNewRoomResponse createNewRoom(@RequestBody CreateNewRoomRequest createNewRoomRequest) {
+        String roomId = apiService.createNewRoom(createNewRoomRequest.getUserId());
         
-        return entity;
+        return new CreateNewRoomResponse(roomId);
     }
     
     @PostMapping("/enter-room")

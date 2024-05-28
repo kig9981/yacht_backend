@@ -1,6 +1,7 @@
 package com.example.yacht_backend.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -17,5 +18,12 @@ public class ApiService {
 
     public List<Room> getAllRooms() {
         return roomRepository.findAll();
+    }
+    
+    public String createNewRoom(String userId) {
+        UUID roomId = UUID.randomUUID();
+        Room newRoom = new Room(roomId, userId, null);
+        roomRepository.save(newRoom);
+        return roomId.toString();
     }
 }
