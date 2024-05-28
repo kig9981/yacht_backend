@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,15 +12,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 public class ApiController {
-    private final RoomRepository roomRepository;
+    private final ApiService apiService;
 
-    ApiController(RoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
+    ApiController(ApiService apiService) {
+        this.apiService = apiService;
     }
 
     @GetMapping("/get-all-rooms")
     public List<Room> getAllRooms() {
-        return roomRepository.findAll();
+        return apiService.getAllRooms();
     }
 
     @PostMapping("/create-new-room")

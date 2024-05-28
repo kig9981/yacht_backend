@@ -24,11 +24,11 @@ class YachtBackendApplicationTests {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private RoomRepository roomRepository;
+	private ApiService apiService;
 
 	@Test
 	void testGetAllRooms() throws Exception {
-		given(roomRepository.findAll()).willReturn(Collections.emptyList());
+		given(apiService.getAllRooms()).willReturn(Collections.emptyList());
 
 		this.mockMvc.perform(get("/get-all-rooms")
 			.contentType(MediaType.APPLICATION_JSON))
