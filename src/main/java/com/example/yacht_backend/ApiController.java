@@ -20,7 +20,7 @@ public class ApiController {
     }
 
     @GetMapping("/get-all-rooms")
-    public List<Room> getAllRooms(@RequestParam String param) {
+    public List<Room> getAllRooms() {
         return roomRepository.findAll();
     }
 
