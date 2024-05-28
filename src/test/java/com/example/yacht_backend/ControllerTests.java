@@ -25,7 +25,7 @@ import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class YachtBackendApplicationTests {
+class ControllerTests {
 
 	@Autowired
 	private MockMvc mockMvc;
