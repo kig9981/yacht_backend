@@ -14,9 +14,9 @@ public class Room {
     private String hostUser;
     private String guestUser;
 
-    Room() {}
+    public Room() {}
 
-    Room(UUID roomId, String hostUser, String guestUser) {
+    public Room(UUID roomId, String hostUser, String guestUser) {
         this.roomId = roomId.toString();
         this.hostUser = hostUser;
         this.guestUser = guestUser;
