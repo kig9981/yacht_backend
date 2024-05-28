@@ -3,17 +3,17 @@ package com.example.yacht_backend.dto;
 public class CreateNewRoomRequest {
     private String userId;
 
-    CreateNewRoomRequest() {}
+    public CreateNewRoomRequest() {}
 
-    CreateNewRoomRequest(String userId) {
+    public CreateNewRoomRequest(String userId) {
         this.userId = userId;
     }
 
-    String getUserId() {
+    public String getUserId() {
         return this.userId;
     }
 
-    void setUserId(String userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 }
