@@ -7,10 +7,11 @@ public class WebSocketMessage {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private String hostUserId;
     private String guestUserId;
-    private int acceptEnter; // 0: REJECTED, 1: ACCEPTED, 2: TIMEOUT
-    public static final int REJECTED = 0;
-    public static final int ACCEPTED = 1;
-    public static final int TIMEOUT = 2;
+    private int acceptEnter;
+    public static final int INVALID = 0;
+    public static final int REJECTED = 1;
+    public static final int ACCEPTED = 2;
+    public static final int TIMEOUT = 3;
     
     public WebSocketMessage() {}
 
