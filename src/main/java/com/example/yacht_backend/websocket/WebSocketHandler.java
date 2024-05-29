@@ -11,6 +11,9 @@ import com.example.yacht_backend.dto.WebSocketMessage;
 import com.example.yacht_backend.model.Room;
 import com.example.yacht_backend.repository.RoomRepository;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -50,6 +53,18 @@ public class WebSocketHandler extends TextWebSocketHandler {
         this.roomRepository = roomRepository;
     }
 
+    static HashMap<String, String> splitQuery(String query) {
+        HashMap<String, String> queryPairs = new HashMap<>();
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            String key = URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8);
+            String value = URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8);
+            queryPairs.put(key, value);
+        }
+        return queryPairs;
+    }
+
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
@@ -58,18 +73,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
             session.close(CloseStatus.BAD_DATA);
             return;
         }
-        String[] queryPairs = query.split("&");
-        if (queryPairs.length != 1) {
+        HashMap<String, String> queryMap = splitQuery(query);
+        String user = queryMap.get("user");
+        String hostUserId = queryMap.get("hostUserId");
+        String guestUserId = queryMap.get("guestUserId");
+        if ((user != "host" && user != "guest") ||
+            (user == "host" && hostUserId == null) ||
+            (user == "guest" && (hostUserId == null || guestUserId == null))) {
             session.close(CloseStatus.BAD_DATA);
             return;
         }
-        if (query.startsWith("hostUserId=")) {
-            String userId = query.split("=")[1];
-            handleHostConnection(session, userId);
+        
+        if (user == "host") {
+            handleHostConnection(session, hostUserId);
         }
-        else if (query.startsWith("guestUserId=")) {
-            String userId = query.split("=")[1];
-            handleGuestConnection(session, userId);
+        else if (user == "guest") {
+            handleGuestConnection(session, hostUserId, guestUserId);
         }
         else {
             session.close(CloseStatus.BAD_DATA);
@@ -88,7 +107,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         lock.unlock();
     }
 
-    void handleGuestConnection(WebSocketSession session, String guestId) throws Exception {
+    void handleGuestConnection(WebSocketSession session, String hostId, String guestId) throws Exception {
         List<Room> rooms = roomRepository.findByGuestUserId(guestId);
         if (rooms.size() != 1) {
             session.close(CloseStatus.SERVER_ERROR);
@@ -98,26 +117,28 @@ public class WebSocketHandler extends TextWebSocketHandler {
         sessionUserMap.put(session.getId(), guestId);
         userSessionMap.put(guestId, session);
 
-        String hostId = pendingRequests.get(guestId);
+        String requestHostId = pendingRequests.get(guestId);
         
-        if (hostId == null) {
-            scheduleGuestTimeout(session);
+        if (requestHostId == null) {
+            scheduleGuestTimeout(session, hostId, guestId);
         }
-        else if (hostId == guestId) {
+        else if (requestHostId == guestId) {
             // host로부터 이미 거절요청을 받음.
-            // TODO: reject 보내기
+            WebSocketMessage message = new WebSocketMessage(hostId, guestId, WebSocketMessage.REJECTED);
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
             session.close();
         }
         else {
             // host로부터 이미 수락요청을 받음.
             WebSocketSession hostSession = userSessionMap.get(hostId);
-            // TODO: accept 보내기
+            WebSocketMessage message = new WebSocketMessage(hostId, guestId, WebSocketMessage.ACCEPTED);
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
             session.close();
         }
         lock.unlock();
     }
 
-    void scheduleGuestTimeout(WebSocketSession session) {
+    void scheduleGuestTimeout(WebSocketSession session, String hostUserId, String guestUserId) {
         ScheduledFuture<?> timeout = scheduler.schedule(() -> {
             try {
                 if (session.isOpen()) {
@@ -138,7 +159,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         WebSocketMessage data = objectMapper.readValue(payload, WebSocketMessage.class);
 
-        String roomId = data.getRoomId();
         String hostUserId = data.getHostUserId();
         String guestUserId = data.getGuestUserId();
         int acceptEnter = data.getAcceptEnter();
@@ -148,7 +168,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             WebSocketSession guestUserSession = userSessionMap.get(guestUserId);
             if (guestUserSession == null) {
                 pendingRequests.put(guestUserId, hostUserId);
-                scheduleHostTimeout(session, guestUserId);
+                scheduleHostTimeout(session, hostUserId, guestUserId);
             }
             else {
                 //TODO: implement
@@ -160,7 +180,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             WebSocketSession guestUserSession = userSessionMap.get(guestUserId);
             if (guestUserSession == null) {
                 pendingRequests.put(guestUserId, guestUserId);
-                scheduleHostTimeout(session, guestUserId);
+                scheduleHostTimeout(session, hostUserId, guestUserId);
             }
             else {
                 //TODO: implement
@@ -169,7 +189,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    void scheduleHostTimeout(WebSocketSession session, String guestUserId) {
+    void scheduleHostTimeout(WebSocketSession session, String hostUserId, String guestUserId) {
         ScheduledFuture<?> timeout = scheduler.schedule(() -> {
             lock.lock();
             String prevResponse = pendingRequests.remove(guestUserId);
