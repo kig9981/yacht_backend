@@ -2,15 +2,16 @@ package com.example.yacht_backend.dto;
 
 public class WebSocketMessage {
     private String roomId;
-    private String userId;
+    private String hostUserId;
+    private String guestUserId;
     private boolean acceptEnter;
 
     public WebSocketMessage() {}
 
-    public WebSocketMessage(String roomId, String userId, boolean acceptEnter) {
+    public WebSocketMessage(String roomId, String hostUserId, String guestUserId) {
         this.roomId = roomId;
-        this.userId = userId;
-        this.acceptEnter = acceptEnter;
+        this.hostUserId = hostUserId;
+        this.guestUserId = guestUserId;
     }
 
     public String getRoomId() {
@@ -21,12 +22,20 @@ public class WebSocketMessage {
         this.roomId = roomId;
     }
 
-    public String getUserId() {
-        return this.userId;
+    public String getHostUserId() {
+        return this.hostUserId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public String getGuestUserId() {
+        return this.guestUserId;
+    }
+
+    public void setHostUserId(String hostUserId) {
+        this.hostUserId = hostUserId;
+    }
+
+    public void setGuestUserId(String guestUserId) {
+        this.guestUserId = guestUserId;
     }
 
     public boolean getAcceptEnter() {
