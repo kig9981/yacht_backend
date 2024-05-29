@@ -206,7 +206,15 @@ public class WebSocketHandler extends TextWebSocketHandler {
             lock.lock();
             String prevResponse = pendingRequests.remove(guestUserId);
             if (prevResponse != null && prevResponse != guestUserId) {
-                // TODO: host에 reject 보내기
+                try {
+                    if (session.isOpen()) {
+                        TextMessage message = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.TIMEOUT).toTextMessage();
+                        session.sendMessage(message);
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             lock.unlock();
         }, 1, TimeUnit.MINUTES);
