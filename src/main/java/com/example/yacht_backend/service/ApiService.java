@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.yacht_backend.model.Room;
 import com.example.yacht_backend.repository.RoomRepository;
 import com.example.yacht_backend.websocket.WebSocketHandler;
+
 
 @Service
 public class ApiService {
@@ -42,5 +44,19 @@ public class ApiService {
             return "PENDING";
         }
         return "REJECTED";
+    }
+
+    @Transactional
+    public void addGuestUserToRoom(String hostUserId, String guestUserId) throws Exception {
+        List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
+        if (hostRooms.size() != 1) {
+            throw new Exception("invalid room info(multiple rooms)");
+        }
+        Room hostRoom = hostRooms.get(0);
+        if (hostRoom.getHostUserId() != hostUserId) {
+            throw new Exception("invalid room info(host)");
+        }
+        hostRoom.setGuestUserId(guestUserId);
+        roomRepository.save(hostRoom);
     }
 }

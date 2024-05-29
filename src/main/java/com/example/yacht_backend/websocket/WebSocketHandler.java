@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.yacht_backend.dto.WebSocketMessage;
 import com.example.yacht_backend.model.Room;
 import com.example.yacht_backend.repository.RoomRepository;
+import com.example.yacht_backend.service.ApiService;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -48,9 +49,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private static final ReentrantLock lock = new ReentrantLock();
     private ObjectMapper objectMapper = new ObjectMapper();
     private final RoomRepository roomRepository;
+    private final ApiService apiService;
 
-    WebSocketHandler(RoomRepository roomRepository) {
+    WebSocketHandler(RoomRepository roomRepository, ApiService apiService) {
         this.roomRepository = roomRepository;
+        this.apiService = apiService;
     }
 
     static HashMap<String, String> splitQuery(String query) {
@@ -131,16 +134,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             TextMessage message = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.ACCEPTED).toTextMessage();
             session.sendMessage(message);
             hostSession.sendMessage(message);
-            List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
-            if (hostRooms.size() != 1) {
-                throw new Exception("invalid room info(multiple rooms)");
-            }
-            Room hostRoom = hostRooms.get(0);
-            if (hostRoom.getHostUserId() != hostUserId) {
-                throw new Exception("invalid room info(host)");
-            }
-            hostRoom.setGuestUserId(guestUserId);
-            roomRepository.save(hostRoom);
+            apiService.addGuestUserToRoom(hostUserId, guestUserId);
             session.close();
         }
         lock.unlock();
@@ -195,16 +189,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 TextMessage responseMessage = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.ACCEPTED).toTextMessage();
                 session.sendMessage(responseMessage);
                 guestUserSession.sendMessage(responseMessage);
-                List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
-                if (hostRooms.size() != 1) {
-                    throw new Exception("invalid room info(multiple rooms)");
-                }
-                Room hostRoom = hostRooms.get(0);
-                if (hostRoom.getHostUserId() != hostUserId) {
-                    throw new Exception("invalid room info(host)");
-                }
-                hostRoom.setGuestUserId(guestUserId);
-                roomRepository.save(hostRoom);
+                apiService.addGuestUserToRoom(hostUserId, guestUserId);
             }
         }
         else if (acceptEnter == WebSocketMessage.REJECTED) {
