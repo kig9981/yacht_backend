@@ -19,6 +19,23 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+/*
+
+대략적 flow
+
+1. host에서 연결을 establish함. 이건 host가 room을 유지하는한 반영구적.
+2. guest에서 /enter-room으로 입장 요청을 날림. 이 때 guest는 연결을 establish하고, host에게 연결 요청을 전달함.
+3-1. guest연결이 먼저 이루어지고, host에서 답이 오는 경우(혹은 host에서 응답하지 않는 경우)
+    1) guest는 연결과 동시에 60초 timeout schedular를 등록. expire시 timeout과 함께 연결 종료.
+    2) host가 입장 요청에 대한 응답이 날아오면, 이건 즉시 이미 연결된 guest를 통해 응답을 돌려주고, host에도 동일한 응답을 돌려줌.
+    3) guest와 연결 종료.
+3-2. host에서 답이 먼저 오고, guest 연결이 이루어지는 경우(혹은 guest에서 응답하지 않는 경우).
+    1) host는 pendingRequests에 guestId를 등록 후 60초 timeout schedular를 등록. expire시 host에 timeout 응답을 돌려줌.
+        (expire 이후 guest의 연결이 진행되어도 자동으로 timeout처리됨.)
+    2) guest의 연결이 이루어지면 pendingRequests에서 요청에 대한 답을 보고 즉시 응답 후 연결 종료. 연결 성공시 host에도 응답을 함.
+
+*/
+
 public class WebSocketHandler extends TextWebSocketHandler {
     private static final ConcurrentHashMap<String, String> sessionUserMap  = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, WebSocketSession> userSessionMap  = new ConcurrentHashMap<>();
@@ -84,19 +101,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String hostId = pendingRequests.get(guestId);
         
         if (hostId == null) {
-            ScheduledFuture<?> timeout = scheduler.schedule(() -> {
-                try {
-                    if (session.isOpen()) {
-                        // TODO: timeout 보내기
-                        session.close();
-                    }
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }, 1, TimeUnit.MINUTES);
-            sessionTimeouts.put(session.getId(), timeout);
-            
+            scheduleGuestTimeout(session);
         }
         else if (hostId == guestId) {
             // host로부터 이미 거절요청을 받음.
@@ -112,6 +117,21 @@ public class WebSocketHandler extends TextWebSocketHandler {
         lock.unlock();
     }
 
+    void scheduleGuestTimeout(WebSocketSession session) {
+        ScheduledFuture<?> timeout = scheduler.schedule(() -> {
+            try {
+                if (session.isOpen()) {
+                    // TODO: timeout 보내기
+                    session.close();
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, 1, TimeUnit.MINUTES);
+        sessionTimeouts.put(session.getId(), timeout);
+    }
+
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         super.handleTextMessage(session, message);
@@ -124,12 +144,41 @@ public class WebSocketHandler extends TextWebSocketHandler {
         boolean acceptEnter = data.getAcceptEnter();
 
         if(acceptEnter) {
-            //TODO: implement
+            lock.lock();
+            WebSocketSession guestUserSession = userSessionMap.get(guestUserId);
+            if (guestUserSession == null) {
+                pendingRequests.put(guestUserId, hostUserId);
+                scheduleHostTimeout(session, guestUserId);
+            }
+            else {
+                //TODO: implement
+            }
+            lock.unlock();
         }
         else {
-            //TODO: implement
-            // WebSocketSession guestUserSession = sessionUserMap.get
+            lock.lock();
+            WebSocketSession guestUserSession = userSessionMap.get(guestUserId);
+            if (guestUserSession == null) {
+                pendingRequests.put(guestUserId, guestUserId);
+                scheduleHostTimeout(session, guestUserId);
+            }
+            else {
+                //TODO: implement
+            }
+            lock.unlock();
         }
+    }
+
+    void scheduleHostTimeout(WebSocketSession session, String guestUserId) {
+        ScheduledFuture<?> timeout = scheduler.schedule(() -> {
+            lock.lock();
+            String prevResponse = pendingRequests.remove(guestUserId);
+            if (prevResponse != null && prevResponse != guestUserId) {
+                // TODO: host에 reject 보내기
+            }
+            lock.unlock();
+        }, 1, TimeUnit.MINUTES);
+        sessionTimeouts.put(session.getId(), timeout);
     }
 
     @Override
