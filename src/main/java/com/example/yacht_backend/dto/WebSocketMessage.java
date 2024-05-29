@@ -1,6 +1,10 @@
 package com.example.yacht_backend.dto;
 
+import org.springframework.web.socket.TextMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class WebSocketMessage {
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private String hostUserId;
     private String guestUserId;
     private int acceptEnter; // 0: REJECTED, 1: ACCEPTED, 2: TIMEOUT
@@ -38,5 +42,9 @@ public class WebSocketMessage {
 
     public void setAcceptEnter(int acceptEnter) {
         this.acceptEnter = acceptEnter;
+    }
+
+    public TextMessage toTextMessage() throws Exception {
+        return new TextMessage(objectMapper.writeValueAsString(this));
     }
 }

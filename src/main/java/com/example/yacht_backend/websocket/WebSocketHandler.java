@@ -124,15 +124,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
         else if (requestHostId == guestId) {
             // host로부터 이미 거절요청을 받음.
-            WebSocketMessage message = new WebSocketMessage(hostId, guestId, WebSocketMessage.REJECTED);
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
+            TextMessage message = new WebSocketMessage(hostId, guestId, WebSocketMessage.REJECTED).toTextMessage();
+            session.sendMessage(message);
             session.close();
         }
         else {
             // host로부터 이미 수락요청을 받음.
             WebSocketSession hostSession = userSessionMap.get(hostId);
-            WebSocketMessage message = new WebSocketMessage(hostId, guestId, WebSocketMessage.ACCEPTED);
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
+            TextMessage message = new WebSocketMessage(hostId, guestId, WebSocketMessage.ACCEPTED).toTextMessage();
+            session.sendMessage(message);
+            hostSession.sendMessage(message);
             session.close();
         }
         lock.unlock();
