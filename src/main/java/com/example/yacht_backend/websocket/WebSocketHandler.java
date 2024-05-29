@@ -255,4 +255,18 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
         lock.unlock();
     }
+
+    public static boolean enterRoom(String hostUserId, String guestUserId) throws Exception {
+        lock.lock();
+        WebSocketSession session = userSessionMap.get(hostUserId);
+        TextMessage message = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.ACCEPTED).toTextMessage();
+        if (session == null) {
+            lock.unlock();
+            return false;
+        }
+        
+        session.sendMessage(message);
+        lock.unlock();
+        return true;
+    }
 }
