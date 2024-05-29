@@ -20,8 +20,8 @@ public class Room {
 
     public Room() {}
 
-    public Room(UUID roomId, String hostUserId, String guestUserId) {
-        this.roomId = roomId.toString();
+    public Room(String roomId, String hostUserId, String guestUserId) {
+        this.roomId = roomId;
         this.hostUserId = hostUserId;
         this.guestUserId = guestUserId;
     }

@@ -21,7 +21,7 @@ public class ApiService {
     }
     
     public String createNewRoom(String userId) {
-        UUID roomId = UUID.randomUUID();
+        String roomId = UUID.randomUUID().toString();
         Room newRoom = new Room(roomId, userId, null);
         roomRepository.save(newRoom);
         return roomId.toString();

@@ -43,7 +43,7 @@ class ServiceTests {
 	void testCreateNewRoom() throws Exception {
         UUID roomId = UUID.randomUUID();
 		String userId = UUID.randomUUID().toString();
-		Room newRoom = new Room(roomId, userId, null);
+		Room newRoom = new Room(roomId.toString(), userId, null);
 
 		mockStatic(UUID.class);
 
