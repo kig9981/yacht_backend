@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Version;
 
 @Entity
 public class Room {
@@ -17,6 +18,9 @@ public class Room {
     private String hostUserId;
     @Column(unique = true)
     private String guestUserId;
+
+    @Version
+    private Integer version;
 
     public Room() {}
 
@@ -50,4 +54,11 @@ public class Room {
         this.guestUserId = guestUserId;
     }
 
+    public Integer getVersion() {
+        return this.version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
 }
