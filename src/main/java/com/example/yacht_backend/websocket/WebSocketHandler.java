@@ -12,11 +12,10 @@ import com.example.yacht_backend.model.Room;
 import com.example.yacht_backend.repository.RoomRepository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebSocketHandler extends TextWebSocketHandler {
-    private static Map<WebSocketSession, String> sessionUserMap  = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<WebSocketSession, String> sessionUserMap  = new ConcurrentHashMap<>();
     private ObjectMapper objectMapper = new ObjectMapper();
     private final RoomRepository roomRepository;
 
@@ -26,22 +25,45 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        super.afterConnectionEstablished(session);
         String query = session.getUri().getQuery();
-        if (query != null && query.startsWith("userId=")) {
+        if (query == null) {
+            session.close(CloseStatus.BAD_DATA);
+            return;
+        }
+        String[] queryPairs = query.split("&");
+        if (queryPairs.length != 1) {
+            session.close(CloseStatus.BAD_DATA);
+            return;
+        }
+        if (query.startsWith("hostUserId=")) {
             String userId = query.split("=")[1];
             List<Room> rooms = roomRepository.findByHostUserId(userId);
             if (rooms.size() == 1) {
                 sessionUserMap.put(session, userId);
-            } else {
+            }
+            else {
                 session.close(CloseStatus.SERVER_ERROR);
             }
-        } else {
+        }
+        else if (query.startsWith("guestUserId=")) {
+            String userId = query.split("=")[1];
+            List<Room> rooms = roomRepository.findByGuestUserId(userId);
+            if (rooms.size() == 1) {
+                sessionUserMap.put(session, userId);
+            }
+            else {
+                session.close(CloseStatus.SERVER_ERROR);
+            }
+        }
+        else {
             session.close(CloseStatus.BAD_DATA);
         }
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        super.handleTextMessage(session, message);
         String payload = message.getPayload();
         WebSocketMessage data = objectMapper.readValue(payload, WebSocketMessage.class);
 
@@ -55,11 +77,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
         else {
             //TODO: implement
+            // WebSocketSession guestUserSession = sessionUserMap.get
         }
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        super.afterConnectionClosed(session, status);
         sessionUserMap.remove(session);
     }
 }
