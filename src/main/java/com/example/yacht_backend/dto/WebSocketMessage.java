@@ -1,14 +1,24 @@
 package com.example.yacht_backend.dto;
 
 public class WebSocketMessage {
+    private String roomId;
     private String userId;
     private boolean acceptEnter;
 
     public WebSocketMessage() {}
 
-    public WebSocketMessage(String userId, boolean acceptEnter) {
+    public WebSocketMessage(String roomId, String userId, boolean acceptEnter) {
+        this.roomId = roomId;
         this.userId = userId;
         this.acceptEnter = acceptEnter;
+    }
+
+    public String getRoomId() {
+        return this.roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 
     public String getUserId() {
