@@ -90,9 +90,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
         else if (user == "guest") {
             handleGuestConnection(session, hostUserId, guestUserId);
         }
-        else {
-            session.close(CloseStatus.BAD_DATA);
-        }
     }
 
     void handleHostConnection(WebSocketSession session, String hostUserId) throws Exception {
@@ -165,30 +162,43 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String guestUserId = data.getGuestUserId();
         int acceptEnter = data.getAcceptEnter();
 
-        if(acceptEnter == WebSocketMessage.ACCEPTED) {
-            lock.lock();
+        if (hostUserId == null || guestUserId == null || acceptEnter == WebSocketMessage.INVALID) {
+            return;
+        }
+
+        lock.lock();
+
+        String userId = sessionUserMap.get(session.getId());
+
+        if (userId != hostUserId) {
+            lock.unlock();
+            return;
+        }
+
+        if (acceptEnter == WebSocketMessage.ACCEPTED) {
             WebSocketSession guestUserSession = userSessionMap.get(guestUserId);
             if (guestUserSession == null) {
                 pendingRequests.put(guestUserId, hostUserId);
                 scheduleHostTimeout(session, hostUserId, guestUserId);
             }
             else {
-                //TODO: implement
+                TextMessage responseMessage = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.ACCEPTED).toTextMessage();
+                session.sendMessage(responseMessage);
+                guestUserSession.sendMessage(responseMessage);
             }
-            lock.unlock();
         }
-        else {
-            lock.lock();
+        else if (acceptEnter == WebSocketMessage.REJECTED) {
             WebSocketSession guestUserSession = userSessionMap.get(guestUserId);
             if (guestUserSession == null) {
                 pendingRequests.put(guestUserId, guestUserId);
                 scheduleHostTimeout(session, hostUserId, guestUserId);
             }
             else {
-                //TODO: implement
+                TextMessage responseMessage = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.REJECTED).toTextMessage();
+                guestUserSession.sendMessage(responseMessage);
             }
-            lock.unlock();
         }
+        lock.unlock();
     }
 
     void scheduleHostTimeout(WebSocketSession session, String hostUserId, String guestUserId) {
