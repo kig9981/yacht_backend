@@ -131,6 +131,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
             TextMessage message = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.ACCEPTED).toTextMessage();
             session.sendMessage(message);
             hostSession.sendMessage(message);
+            List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
+            if (hostRooms.size() != 1) {
+                throw new Exception("invalid room info(multiple rooms)");
+            }
+            Room hostRoom = hostRooms.get(0);
+            if (hostRoom.getHostUserId() != hostUserId) {
+                throw new Exception("invalid room info(host)");
+            }
+            hostRoom.setGuestUserId(guestUserId);
+            roomRepository.save(hostRoom);
             session.close();
         }
         lock.unlock();
@@ -185,6 +195,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 TextMessage responseMessage = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.ACCEPTED).toTextMessage();
                 session.sendMessage(responseMessage);
                 guestUserSession.sendMessage(responseMessage);
+                List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
+                if (hostRooms.size() != 1) {
+                    throw new Exception("invalid room info(multiple rooms)");
+                }
+                Room hostRoom = hostRooms.get(0);
+                if (hostRoom.getHostUserId() != hostUserId) {
+                    throw new Exception("invalid room info(host)");
+                }
+                hostRoom.setGuestUserId(guestUserId);
+                roomRepository.save(hostRoom);
             }
         }
         else if (acceptEnter == WebSocketMessage.REJECTED) {
