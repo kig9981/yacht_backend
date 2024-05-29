@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.yacht_backend.dto.CreateNewRoomRequest;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.dto.EnterRoomRequest;
+import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.model.Room;
 import com.example.yacht_backend.service.ApiService;
 
@@ -39,10 +40,10 @@ public class ApiController {
     }
     
     @PostMapping("/enter-room")
-    public String enterRoom(@RequestBody EnterRoomRequest enterRoomRequest) {
+    public EnterRoomResponse enterRoom(@RequestBody EnterRoomRequest enterRoomRequest) {
         //TODO: process POST request
         
-        return "";
+        return new EnterRoomResponse("");
     }
 
     @DeleteMapping("/leave-room")
