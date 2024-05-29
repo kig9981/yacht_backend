@@ -95,43 +95,43 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    void handleHostConnection(WebSocketSession session, String hostId) throws Exception {
-        List<Room> rooms = roomRepository.findByHostUserId(hostId);
+    void handleHostConnection(WebSocketSession session, String hostUserId) throws Exception {
+        List<Room> rooms = roomRepository.findByHostUserId(hostUserId);
         if (rooms.size() != 1) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
         lock.lock();
-        sessionUserMap.put(session.getId(), hostId);
-        userSessionMap.put(hostId, session);
+        sessionUserMap.put(session.getId(), hostUserId);
+        userSessionMap.put(hostUserId, session);
         lock.unlock();
     }
 
-    void handleGuestConnection(WebSocketSession session, String hostId, String guestId) throws Exception {
-        List<Room> rooms = roomRepository.findByGuestUserId(guestId);
+    void handleGuestConnection(WebSocketSession session, String hostUserId, String guestUserId) throws Exception {
+        List<Room> rooms = roomRepository.findByGuestUserId(guestUserId);
         if (rooms.size() != 1) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
         lock.lock();
-        sessionUserMap.put(session.getId(), guestId);
-        userSessionMap.put(guestId, session);
+        sessionUserMap.put(session.getId(), guestUserId);
+        userSessionMap.put(guestUserId, session);
 
-        String requestHostId = pendingRequests.get(guestId);
+        String requestHostId = pendingRequests.get(guestUserId);
         
         if (requestHostId == null) {
-            scheduleGuestTimeout(session, hostId, guestId);
+            scheduleGuestTimeout(session, hostUserId, guestUserId);
         }
-        else if (requestHostId == guestId) {
+        else if (requestHostId == guestUserId) {
             // host로부터 이미 거절요청을 받음.
-            TextMessage message = new WebSocketMessage(hostId, guestId, WebSocketMessage.REJECTED).toTextMessage();
+            TextMessage message = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.REJECTED).toTextMessage();
             session.sendMessage(message);
             session.close();
         }
         else {
             // host로부터 이미 수락요청을 받음.
-            WebSocketSession hostSession = userSessionMap.get(hostId);
-            TextMessage message = new WebSocketMessage(hostId, guestId, WebSocketMessage.ACCEPTED).toTextMessage();
+            WebSocketSession hostSession = userSessionMap.get(hostUserId);
+            TextMessage message = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.ACCEPTED).toTextMessage();
             session.sendMessage(message);
             hostSession.sendMessage(message);
             session.close();
@@ -143,7 +143,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
         ScheduledFuture<?> timeout = scheduler.schedule(() -> {
             try {
                 if (session.isOpen()) {
-                    // TODO: timeout 보내기
+                    TextMessage message = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.TIMEOUT).toTextMessage();
+                    session.sendMessage(message);
                     session.close();
                 }
             }
