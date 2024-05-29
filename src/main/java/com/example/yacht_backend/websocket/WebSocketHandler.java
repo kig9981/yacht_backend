@@ -13,9 +13,17 @@ import com.example.yacht_backend.repository.RoomRepository;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class WebSocketHandler extends TextWebSocketHandler {
-    private static ConcurrentHashMap<WebSocketSession, String> sessionUserMap  = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, String> sessionUserMap  = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, ScheduledFuture<?>> sessionTimeouts = new ConcurrentHashMap<>();
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final ReentrantLock lock = new ReentrantLock();
     private ObjectMapper objectMapper = new ObjectMapper();
     private final RoomRepository roomRepository;
 
@@ -40,7 +48,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
             String userId = query.split("=")[1];
             List<Room> rooms = roomRepository.findByHostUserId(userId);
             if (rooms.size() == 1) {
-                sessionUserMap.put(session, userId);
+                lock.lock();
+                sessionUserMap.put(session.getId(), userId);
+                lock.unlock();
             }
             else {
                 session.close(CloseStatus.SERVER_ERROR);
@@ -50,7 +60,21 @@ public class WebSocketHandler extends TextWebSocketHandler {
             String userId = query.split("=")[1];
             List<Room> rooms = roomRepository.findByGuestUserId(userId);
             if (rooms.size() == 1) {
-                sessionUserMap.put(session, userId);
+                lock.lock();
+                sessionUserMap.put(session.getId(), userId);
+                ScheduledFuture<?> timeout = scheduler.schedule(() -> {
+                    try {
+                        if (session.isOpen()) {
+                            session.close();
+                        }
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }, 1, TimeUnit.MINUTES);
+
+                sessionTimeouts.put(session.getId(), timeout);
+                lock.unlock();
             }
             else {
                 session.close(CloseStatus.SERVER_ERROR);
@@ -84,6 +108,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
-        sessionUserMap.remove(session);
+        String sessionId = session.getId();
+        lock.lock();
+        sessionUserMap.remove(sessionId);
+        ScheduledFuture<?> timeout = sessionTimeouts.remove(sessionId);
+        if (timeout != null) {
+            timeout.cancel(true);
+        }
+        lock.unlock();
     }
 }
