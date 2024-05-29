@@ -1,7 +1,6 @@
 package com.example.yacht_backend.dto;
 
 public class WebSocketMessage {
-    private String roomId;
     private String hostUserId;
     private String guestUserId;
     private int acceptEnter; // 0: REJECTED, 1: ACCEPTED, 2: TIMEOUT
@@ -11,19 +10,10 @@ public class WebSocketMessage {
     
     public WebSocketMessage() {}
 
-    public WebSocketMessage(String roomId, String hostUserId, String guestUserId, int acceptEnter) {
-        this.roomId = roomId;
+    public WebSocketMessage(String hostUserId, String guestUserId, int acceptEnter) {
         this.hostUserId = hostUserId;
         this.guestUserId = guestUserId;
         this.acceptEnter = acceptEnter;
-    }
-
-    public String getRoomId() {
-        return this.roomId;
-    }
-
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
     }
 
     public String getHostUserId() {
