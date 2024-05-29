@@ -4,14 +4,18 @@ public class WebSocketMessage {
     private String roomId;
     private String hostUserId;
     private String guestUserId;
-    private boolean acceptEnter;
-
+    private int acceptEnter; // 0: REJECTED, 1: ACCEPTED, 2: TIMEOUT
+    public static final int REJECTED = 0;
+    public static final int ACCEPTED = 1;
+    public static final int TIMEOUT = 2;
+    
     public WebSocketMessage() {}
 
-    public WebSocketMessage(String roomId, String hostUserId, String guestUserId) {
+    public WebSocketMessage(String roomId, String hostUserId, String guestUserId, int acceptEnter) {
         this.roomId = roomId;
         this.hostUserId = hostUserId;
         this.guestUserId = guestUserId;
+        this.acceptEnter = acceptEnter;
     }
 
     public String getRoomId() {
@@ -38,11 +42,11 @@ public class WebSocketMessage {
         this.guestUserId = guestUserId;
     }
 
-    public boolean getAcceptEnter() {
+    public int getAcceptEnter() {
         return this.acceptEnter;
     }
 
-    public void setAcceptEnter(boolean acceptEnter) {
+    public void setAcceptEnter(int acceptEnter) {
         this.acceptEnter = acceptEnter;
     }
 }

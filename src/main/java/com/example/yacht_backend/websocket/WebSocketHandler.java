@@ -141,9 +141,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String roomId = data.getRoomId();
         String hostUserId = data.getHostUserId();
         String guestUserId = data.getGuestUserId();
-        boolean acceptEnter = data.getAcceptEnter();
+        int acceptEnter = data.getAcceptEnter();
 
-        if(acceptEnter) {
+        if(acceptEnter == WebSocketMessage.ACCEPTED) {
             lock.lock();
             WebSocketSession guestUserSession = userSessionMap.get(guestUserId);
             if (guestUserSession == null) {
