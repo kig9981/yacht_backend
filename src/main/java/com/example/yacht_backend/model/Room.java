@@ -2,6 +2,7 @@ package com.example.yacht_backend.model;
 
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -10,40 +11,43 @@ import jakarta.persistence.Id;
 public class Room {
     private @Id
     @GeneratedValue Long id;
+    @Column(unique = true)
     private String roomId;
-    private String hostUser;
-    private String guestUser;
+    @Column(unique = true)
+    private String hostUserId;
+    @Column(unique = true)
+    private String guestUserId;
 
     public Room() {}
 
-    public Room(UUID roomId, String hostUser, String guestUser) {
+    public Room(UUID roomId, String hostUserId, String guestUserId) {
         this.roomId = roomId.toString();
-        this.hostUser = hostUser;
-        this.guestUser = guestUser;
+        this.hostUserId = hostUserId;
+        this.guestUserId = guestUserId;
     }
     
     public String getRoomId() {
         return this.roomId;
     }
 
-    public String getHostUser() {
-        return this.hostUser;
+    public String getHostUserId() {
+        return this.hostUserId;
     }
 
-    public String getGuestUser() {
-        return this.guestUser;
+    public String getGuestUserId() {
+        return this.guestUserId;
     }
 
     public void setRoomId(String roomId) {
         this.roomId = roomId;
     }
 
-    public void setHostUser(String hostUser) {
-        this.hostUser = hostUser;
+    public void setHostUserId(String hostUserId) {
+        this.hostUserId = hostUserId;
     }
 
-    public void setGuestUser(String guestUser) {
-        this.guestUser = guestUser;
+    public void setGuestUserId(String guestUserId) {
+        this.guestUserId = guestUserId;
     }
 
 }
