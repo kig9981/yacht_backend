@@ -42,8 +42,11 @@ public class ApiService {
 
     public String enterRoom(String roomId, String userId) throws Exception {
         Room room = apiDatabaseService.findRoomById(roomId);
-        if (room == null || room.getGuestUserId() != null) {
-            return "REJECTED";
+        if (room == null) {
+            return "Room Not Exists";
+        }
+        if(apiDatabaseService.isUserInRoom(userId)) {
+            return "Already in room";
         }
         boolean requestSuccess = WebSocketHandler.enterRoom(room.getHostUserId(), userId);
         if (requestSuccess) {

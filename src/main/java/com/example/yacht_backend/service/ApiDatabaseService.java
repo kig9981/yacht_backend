@@ -66,4 +66,9 @@ public class ApiDatabaseService {
         Room room = rooms.get(0); 
         return room;
     }
+
+    @Transactional(readOnly=true)
+    public boolean isUserInRoom(String userId) {
+        return findRoomByHostUserId(userId) != null || findRoomByGuestUserId(userId) != null;
+    }
 }
