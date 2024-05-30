@@ -1,14 +1,18 @@
 package com.example.yacht_backend.model;
 
-import java.util.UUID;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 
 @Entity
+@Table(name = "id_uniqueness_check", uniqueConstraints = {
+    @UniqueConstraint(columnNames = "roomId"),
+    @UniqueConstraint(columnNames = {"hostUserId", "guestUserId"})
+})
 public class Room {
     private @Id
     @GeneratedValue Long id;
