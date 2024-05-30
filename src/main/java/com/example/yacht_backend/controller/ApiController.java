@@ -34,9 +34,7 @@ public class ApiController {
 
     @PostMapping("/create-new-room")
     public CreateNewRoomResponse createNewRoom(@RequestBody CreateNewRoomRequest createNewRoomRequest) {
-        String roomId = apiService.createNewRoom(createNewRoomRequest.getUserId());
-        
-        return new CreateNewRoomResponse(roomId);
+        return apiService.createNewRoom(createNewRoomRequest.getUserId());
     }
     
     @PostMapping("/enter-room")
