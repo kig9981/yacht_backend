@@ -1,5 +1,8 @@
 package com.example.yacht_backend.websocket;
 
+import org.apache.tomcat.util.digester.DocumentProperties.Charset;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.NameValuePair;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -56,14 +59,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
         this.apiService = apiService;
     }
 
-    static HashMap<String, String> splitQuery(String query) {
+    static HashMap<String, String> parseQuerystring(String query) throws IllegalArgumentException {
+        List<NameValuePair> params = URLEncodedUtils.parse(query, StandardCharsets.UTF_8);
         HashMap<String, String> queryPairs = new HashMap<>();
-        String[] pairs = query.split("&");
-        for (String pair : pairs) {
-            int idx = pair.indexOf("=");
-            String key = URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8);
-            String value = URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8);
-            queryPairs.put(key, value);
+        for (NameValuePair param : params) {
+            String name = param.getName();
+            String value = param.getValue();
+
+            queryPairs.put(name, value);
         }
         return queryPairs;
     }
@@ -76,7 +79,15 @@ public class WebSocketHandler extends TextWebSocketHandler {
             session.close(CloseStatus.BAD_DATA);
             return;
         }
-        HashMap<String, String> queryMap = splitQuery(query);
+        
+        HashMap<String, String> queryMap;
+        try {
+            queryMap = parseQuerystring(query);
+        }
+        catch (IllegalArgumentException e) {
+            session.close(CloseStatus.BAD_DATA);
+            return;
+        }
         String user = queryMap.get("user");
         String hostUserId = queryMap.get("hostUserId");
         String guestUserId = queryMap.get("guestUserId");
