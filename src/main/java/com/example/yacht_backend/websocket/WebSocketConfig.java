@@ -5,21 +5,20 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-import com.example.yacht_backend.repository.RoomRepository;
-import com.example.yacht_backend.service.ApiService;
+import com.example.yacht_backend.service.ApiDatabaseService;
 
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
-    private final ApiService apiService;
+    private final ApiDatabaseService apiDatabaseService;
 
-    WebSocketConfig(ApiService apiService) {
-        this.apiService = apiService;
+    WebSocketConfig(ApiDatabaseService apiDatabaseService) {
+        this.apiDatabaseService = apiDatabaseService;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         // TODO: setAllowedOrigins("*")를 수정
-        registry.addHandler(new WebSocketHandler(apiService), "/ws").setAllowedOrigins("*");
+        registry.addHandler(new WebSocketHandler(apiDatabaseService), "/ws").setAllowedOrigins("*");
     }
 }

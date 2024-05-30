@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.yacht_backend.dto.WebSocketMessage;
 import com.example.yacht_backend.model.Room;
 import com.example.yacht_backend.repository.RoomRepository;
+import com.example.yacht_backend.service.ApiDatabaseService;
 import com.example.yacht_backend.service.ApiService;
 
 import java.net.URLDecoder;
@@ -53,10 +54,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static final ReentrantLock lock = new ReentrantLock();
     private ObjectMapper objectMapper = new ObjectMapper();
-    private final ApiService apiService;
+    private final ApiDatabaseService apiDatabaseService;
 
-    WebSocketHandler(ApiService apiService) {
-        this.apiService = apiService;
+    WebSocketHandler(ApiDatabaseService apiDatabaseService) {
+        this.apiDatabaseService = apiDatabaseService;
     }
 
     static HashMap<String, String> parseQuerystring(String query) throws IllegalArgumentException {
@@ -107,7 +108,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     void handleHostConnection(WebSocketSession session, String hostUserId) throws Exception {
-        if (apiService.findRoomByHostUserId(hostUserId) == null) {
+        if (apiDatabaseService.findRoomByHostUserId(hostUserId) == null) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
@@ -119,7 +120,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     void handleGuestConnection(WebSocketSession session, String hostUserId, String guestUserId) throws Exception {
-        if (apiService.findRoomByHostUserId(hostUserId) == null) {
+        if (apiDatabaseService.findRoomByHostUserId(hostUserId) == null) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
@@ -144,7 +145,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             TextMessage message = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.ACCEPTED).toTextMessage();
             session.sendMessage(message);
             hostSession.sendMessage(message);
-            apiService.addGuestUserToRoom(hostUserId, guestUserId);
+            apiDatabaseService.addGuestUserToRoom(hostUserId, guestUserId);
             session.close();
         }
         lock.unlock();
@@ -199,7 +200,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 TextMessage responseMessage = new WebSocketMessage(hostUserId, guestUserId, WebSocketMessage.ACCEPTED).toTextMessage();
                 session.sendMessage(responseMessage);
                 guestUserSession.sendMessage(responseMessage);
-                apiService.addGuestUserToRoom(hostUserId, guestUserId);
+                apiDatabaseService.addGuestUserToRoom(hostUserId, guestUserId);
             }
         }
         else if (acceptEnter == WebSocketMessage.REJECTED) {

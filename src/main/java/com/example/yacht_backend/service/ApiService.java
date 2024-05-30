@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.yacht_backend.exception.RoomNotFoundException;
 import com.example.yacht_backend.model.Room;
-import com.example.yacht_backend.repository.RoomRepository;
 import com.example.yacht_backend.websocket.WebSocketHandler;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -16,38 +15,34 @@ import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ApiService {
-    private final RoomRepository roomRepository;
+    private final ApiDatabaseService apiDatabaseService;
 
-    ApiService(RoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
+    ApiService(ApiDatabaseService apiDatabaseService) {
+        this.apiDatabaseService = apiDatabaseService;
     }
 
     public List<Room> getAllRooms() {
-        return roomRepository.findAll();
+        return apiDatabaseService.findAll();
     }
     
     public String createNewRoom(String userId) {
-        Room hostRoom = findRoomByHostUserId(userId);
+        Room hostRoom = apiDatabaseService.findRoomByHostUserId(userId);
         if (hostRoom != null) {
             return hostRoom.getRoomId();
         }
-        Room guestRoom = findRoomByGuestUserId(userId);
+        Room guestRoom = apiDatabaseService.findRoomByGuestUserId(userId);
         if (guestRoom != null) {
             return null;
         }
         String roomId = UUID.randomUUID().toString();
         Room newRoom = new Room(roomId, userId, null);
-        roomRepository.save(newRoom);
+        apiDatabaseService.save(newRoom);
         return roomId.toString();
     }
 
     public String enterRoom(String roomId, String userId) throws Exception {
-        List<Room> rooms = roomRepository.findByRoomId(roomId);
-        if (rooms.size() != 1) {
-            throw new Exception("invalid db(multiple roomId)");
-        }
-        Room room = rooms.get(0);
-        if (room.getGuestUserId() != null) {
+        Room room = apiDatabaseService.findRoomById(roomId);
+        if (room == null || room.getGuestUserId() != null) {
             return "REJECTED";
         }
         boolean requestSuccess = WebSocketHandler.enterRoom(room.getHostUserId(), userId);
@@ -55,45 +50,5 @@ public class ApiService {
             return "PENDING";
         }
         return "REJECTED";
-    }
-
-    @Transactional
-    public void addGuestUserToRoom(String hostUserId, String guestUserId) throws RoomNotFoundException {
-        Room hostRoom = findRoomByHostUserId(hostUserId);
-        if (hostRoom.getHostUserId() != hostUserId) {
-            throw new RoomNotFoundException("invalid room info(host)");
-        }
-        hostRoom.setGuestUserId(guestUserId);
-        roomRepository.save(hostRoom);
-    }
-
-    @Transactional(readOnly=true)
-    public Room findRoomByHostUserId(String hostUserId) {
-        List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
-        if (hostRooms.isEmpty()) {
-            return null;
-        }
-        Room hostRoom = hostRooms.get(0); 
-        return hostRoom;
-    }
-
-    @Transactional(readOnly=true)
-    public Room findRoomByGuestUserId(String guestUserId) {
-        List<Room> guestRooms = roomRepository.findByGuestUserId(guestUserId);
-        if (guestRooms.isEmpty()) {
-            return null;
-        }
-        Room guestRoom = guestRooms.get(0); 
-        return guestRoom;
-    }
-
-    @Transactional(readOnly=true)
-    public Room findRoomById(String roomId) {
-        List<Room> rooms = roomRepository.findByRoomId(roomId);
-        if (rooms.isEmpty()) {
-            return null;
-        }
-        Room room = rooms.get(0); 
-        return room;
     }
 }
