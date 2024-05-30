@@ -28,6 +28,13 @@ public class ApiService {
     
     public String createNewRoom(String userId) {
         Room hostRoom = findRoomByHostUserId(userId);
+        if (hostRoom != null) {
+            return hostRoom.getRoomId();
+        }
+        Room guestRoom = findRoomByGuestUserId(userId);
+        if (guestRoom != null) {
+            return null;
+        }
         String roomId = UUID.randomUUID().toString();
         Room newRoom = new Room(roomId, userId, null);
         roomRepository.save(newRoom);
