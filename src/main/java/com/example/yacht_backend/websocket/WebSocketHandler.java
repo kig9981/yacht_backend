@@ -107,10 +107,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     void handleHostConnection(WebSocketSession session, String hostUserId) throws Exception {
-        try {
-            apiService.findRoomByHostUserId(hostUserId);
-        }
-        catch(EntityNotFoundException e) {
+        if (apiService.findRoomByHostUserId(hostUserId) == null) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
@@ -122,10 +119,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     void handleGuestConnection(WebSocketSession session, String hostUserId, String guestUserId) throws Exception {
-        try {
-            apiService.findRoomByHostUserId(hostUserId);
-        }
-        catch(EntityNotFoundException e) {
+        if (apiService.findRoomByHostUserId(hostUserId) == null) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
