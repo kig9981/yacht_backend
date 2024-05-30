@@ -51,6 +51,15 @@ public class ApiService {
                 guestId.setResult(null);
             }
         });
+
+        guestId.onCompletion(() -> {
+            synchronized (guestId) {
+                if (!guestId.hasResult()) {
+                    roomGuestMap.remove(roomId);
+                    guestId.setResult(null);
+                }
+            }
+        });
         return new CreateNewRoomResponse(roomId, guestId);
     }
 
