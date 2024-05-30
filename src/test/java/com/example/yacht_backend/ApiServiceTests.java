@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.example.yacht_backend.service.ApiService;
+import com.example.yacht_backend.service.ApiDatabaseService;
 import com.example.yacht_backend.model.Room;
-import com.example.yacht_backend.repository.RoomRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Collections;
 import java.util.UUID;
 
-class ServiceTests {
+class ApiServiceTests {
 	@InjectMocks
 	private ApiService apiService;
 
     @Mock
-    private RoomRepository roomRepository;
+    private ApiDatabaseService apiDatabaseService;
 
     @BeforeEach
     void initialize() {
@@ -32,7 +32,7 @@ class ServiceTests {
 
 	@Test
 	void testGetAllRooms() throws Exception {
-		given(roomRepository.findAll()).willReturn(Collections.emptyList());
+		given(apiDatabaseService.findAll()).willReturn(Collections.emptyList());
 
         List<Room> allRooms = apiService.getAllRooms();
 
@@ -47,7 +47,9 @@ class ServiceTests {
 
 		mockStatic(UUID.class);
 
-		given(roomRepository.save(newRoom)).willReturn(newRoom);
+		given(apiDatabaseService.findRoomByHostUserId(userId)).willReturn(null);
+		given(apiDatabaseService.findRoomByGuestUserId(userId)).willReturn(null);
+		given(apiDatabaseService.save(newRoom)).willReturn(newRoom);
 		given(UUID.randomUUID()).willReturn(roomId);
 
 		String newRoomId = apiService.createNewRoom(userId);
