@@ -8,6 +8,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.example.yacht_backend.service.ApiService;
 import com.example.yacht_backend.service.ApiDatabaseService;
+import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.model.Room;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,9 +53,9 @@ class ApiServiceTests {
 		given(apiDatabaseService.save(newRoom)).willReturn(newRoom);
 		given(UUID.randomUUID()).willReturn(roomId);
 
-		String newRoomId = apiService.createNewRoom(userId);
+		CreateNewRoomResponse createNewRoomResponse = apiService.createNewRoom(userId);
 
-		assertEquals(newRoomId, roomId.toString());
+		assertEquals(createNewRoomResponse.getRoomId(), roomId.toString());
 	}
 
 }
