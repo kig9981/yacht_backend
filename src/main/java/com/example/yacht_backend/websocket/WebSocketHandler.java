@@ -26,6 +26,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import jakarta.persistence.EntityNotFoundException;
+
 /*
 
 대략적 flow
@@ -105,11 +107,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     void handleHostConnection(WebSocketSession session, String hostUserId) throws Exception {
-        List<Room> rooms = roomRepository.findByHostUserId(hostUserId);
-        if (rooms.size() != 1) {
+        try {
+            apiService.findRoomByHostUserId(hostUserId);
+        }
+        catch(EntityNotFoundException e) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
+
         lock.lock();
         sessionUserMap.put(session.getId(), hostUserId);
         userSessionMap.put(hostUserId, session);
@@ -117,8 +122,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     void handleGuestConnection(WebSocketSession session, String hostUserId, String guestUserId) throws Exception {
-        List<Room> rooms = roomRepository.findByHostUserId(hostUserId);
-        if (rooms.size() != 1) {
+        try {
+            apiService.findRoomByHostUserId(hostUserId);
+        }
+        catch(EntityNotFoundException e) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
