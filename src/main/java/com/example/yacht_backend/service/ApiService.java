@@ -71,6 +71,16 @@ public class ApiService {
     }
 
     @Transactional(readOnly=true)
+    public Room findRoomByGuestUserId(String guestUserId) {
+        List<Room> guestRooms = roomRepository.findByGuestUserId(guestUserId);
+        if (guestRooms.isEmpty()) {
+            return null;
+        }
+        Room guestRoom = guestRooms.get(0); 
+        return guestRoom;
+    }
+
+    @Transactional(readOnly=true)
     public Room findRoomById(String hostUserId) {
         List<Room> rooms = roomRepository.findByRoomId(hostUserId);
         if (rooms.isEmpty()) {
