@@ -51,11 +51,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static final ReentrantLock lock = new ReentrantLock();
     private ObjectMapper objectMapper = new ObjectMapper();
-    private final RoomRepository roomRepository;
     private final ApiService apiService;
 
-    WebSocketHandler(RoomRepository roomRepository, ApiService apiService) {
-        this.roomRepository = roomRepository;
+    WebSocketHandler(ApiService apiService) {
         this.apiService = apiService;
     }
 
@@ -119,7 +117,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     void handleGuestConnection(WebSocketSession session, String hostUserId, String guestUserId) throws Exception {
-        List<Room> rooms = roomRepository.findByGuestUserId(guestUserId);
+        List<Room> rooms = roomRepository.findByHostUserId(hostUserId);
         if (rooms.size() != 1) {
             session.close(CloseStatus.SERVER_ERROR);
             return;

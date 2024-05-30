@@ -11,17 +11,15 @@ import com.example.yacht_backend.service.ApiService;
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
-    private final RoomRepository roomRepository;
     private final ApiService apiService;
 
-    WebSocketConfig(RoomRepository roomRepository, ApiService apiService) {
-        this.roomRepository = roomRepository;
+    WebSocketConfig(ApiService apiService) {
         this.apiService = apiService;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         // TODO: setAllowedOrigins("*")를 수정
-        registry.addHandler(new WebSocketHandler(roomRepository, apiService), "/ws").setAllowedOrigins("*");
+        registry.addHandler(new WebSocketHandler(apiService), "/ws").setAllowedOrigins("*");
     }
 }
