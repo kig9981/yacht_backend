@@ -51,7 +51,7 @@ public class ApiService {
 
     @Transactional
     public void addGuestUserToRoom(String hostUserId, String guestUserId) throws EntityNotFoundException, RoomNotFoundException {
-        Room hostRoom = findRoomByHostId(hostUserId);
+        Room hostRoom = findRoomByHostUserId(hostUserId);
         if (hostRoom.getHostUserId() != hostUserId) {
             throw new RoomNotFoundException("invalid room info(host)");
         }
@@ -60,7 +60,7 @@ public class ApiService {
     }
 
     @Transactional(readOnly=true)
-    public Room findRoomByHostId(String hostUserId) throws EntityNotFoundException {
+    public Room findRoomByHostUserId(String hostUserId) throws EntityNotFoundException {
         List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
         if (hostRooms.isEmpty()) {
             throw new EntityNotFoundException("no room exists");
