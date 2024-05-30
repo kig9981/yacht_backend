@@ -39,9 +39,7 @@ public class ApiController {
     
     @PostMapping("/enter-room")
     public EnterRoomResponse enterRoom(@RequestBody EnterRoomRequest enterRoomRequest) throws Exception {
-        String response = apiService.enterRoom(enterRoomRequest.getRoomId(), enterRoomRequest.getUserId());
-        
-        return new EnterRoomResponse(response);
+        return apiService.enterRoom(enterRoomRequest.getRoomId(), enterRoomRequest.getUserId());
     }
 
     @DeleteMapping("/leave-room")
