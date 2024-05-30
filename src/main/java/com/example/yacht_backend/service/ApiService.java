@@ -7,8 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 import com.example.yacht_backend.model.Room;
-import com.example.yacht_backend.websocket.WebSocketHandler;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
+import com.example.yacht_backend.dto.EnterRoomResponse;
+import com.example.yacht_backend.exception.RoomNotFoundException;
 
 
 @Service
@@ -63,18 +64,36 @@ public class ApiService {
         return new CreateNewRoomResponse(roomId, guestId);
     }
 
-    public String enterRoom(String roomId, String userId) throws Exception {
+    public EnterRoomResponse enterRoom(String roomId, String userId) {
         Room room = apiDatabaseService.findRoomById(roomId);
         if (room == null) {
-            return "Room Not Exists";
+            return new EnterRoomResponse("Room Not Exists", false);
         }
         if(apiDatabaseService.isUserInRoom(userId)) {
-            return "Already in room";
+            return new EnterRoomResponse("Already in room", false);
         }
-        boolean requestSuccess = WebSocketHandler.enterRoom(room.getHostUserId(), userId);
-        if (requestSuccess) {
-            return "PENDING";
+        DeferredResult<String> guestResult = roomGuestMap.get(roomId);
+
+        if (guestResult == null) {
+            return new EnterRoomResponse("Room is full", false); // 일시적으로 끊어진 상태 or 이미 누군가 들어간 상태
         }
-        return "REJECTED";
+
+        synchronized (guestResult) {
+            if (guestResult.hasResult()) {
+                return new EnterRoomResponse("Room is full", false);
+            }
+            String hostUserId = room.getHostUserId();
+            try {
+                apiDatabaseService.addGuestUserToRoom(hostUserId, userId);
+            }
+            catch (RoomNotFoundException e) {
+                return new EnterRoomResponse("unknown error", false);
+            }
+            guestResult.setResult(userId);
+            roomGuestMap.remove(roomId);
+            
+            return new EnterRoomResponse(hostUserId, true);
+        }
+        
     }
 }
