@@ -6,9 +6,12 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.yacht_backend.exception.RoomNotFoundException;
 import com.example.yacht_backend.model.Room;
 import com.example.yacht_backend.repository.RoomRepository;
 import com.example.yacht_backend.websocket.WebSocketHandler;
+
+import jakarta.persistence.EntityNotFoundException;
 
 
 @Service
@@ -47,16 +50,32 @@ public class ApiService {
     }
 
     @Transactional
-    public void addGuestUserToRoom(String hostUserId, String guestUserId) throws Exception {
-        List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
-        if (hostRooms.size() != 1) {
-            throw new Exception("invalid room info(multiple rooms)");
-        }
-        Room hostRoom = hostRooms.get(0);
+    public void addGuestUserToRoom(String hostUserId, String guestUserId) throws EntityNotFoundException, RoomNotFoundException {
+        Room hostRoom = findRoomByHostId(hostUserId);
         if (hostRoom.getHostUserId() != hostUserId) {
-            throw new Exception("invalid room info(host)");
+            throw new RoomNotFoundException("invalid room info(host)");
         }
         hostRoom.setGuestUserId(guestUserId);
         roomRepository.save(hostRoom);
+    }
+
+    @Transactional(readOnly=true)
+    public Room findRoomByHostId(String hostUserId) throws EntityNotFoundException {
+        List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
+        if (hostRooms.isEmpty()) {
+            throw new EntityNotFoundException("no room exists");
+        }
+        Room hostRoom = hostRooms.get(0); 
+        return hostRoom;
+    }
+
+    @Transactional(readOnly=true)
+    public Room findRoomById(String hostUserId) throws EntityNotFoundException {
+        List<Room> rooms = roomRepository.findByRoomId(hostUserId);
+        if (rooms.isEmpty()) {
+            throw new EntityNotFoundException("no room exists");
+        }
+        Room room = rooms.get(0); 
+        return room;
     }
 }
