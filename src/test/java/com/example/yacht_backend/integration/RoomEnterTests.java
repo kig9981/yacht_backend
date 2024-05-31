@@ -20,6 +20,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockAsyncContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,9 +36,12 @@ import com.example.yacht_backend.service.RoomService;
 import com.example.yacht_backend.service.UserDatabaseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.AsyncListener;
+
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Transactional
@@ -85,24 +89,34 @@ class RoomEnterTests {
         // 방 생성
 
         CreateNewRoomRequest createNewRoomRequest = new CreateNewRoomRequest(user.getSessionId(), "data");
-        roomService.setDefferedResultTimeout(50000L);
+        roomService.setDefferedResultTimeout(3000L);
         roomService.enableOnCompletion(false);
 
-        // MvcResult mvcResult = mockMvc.perform(post("/rooms/wait")
-        //     .contentType(MediaType.APPLICATION_JSON)
-		// 	.content(objectMapper.writeValueAsString(createNewRoomRequest)))
-        //     .andExpect(request().asyncStarted())
-        //     .andReturn();
+        MvcResult mvcResult = mockMvc.perform(post("/rooms/wait")
+            .contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(createNewRoomRequest)))
+            .andExpect(request().asyncStarted())
+            .andReturn();
 
-        // mockMvc.perform(asyncDispatch(mvcResult))
-        //     .andExpect(status().isOk())
-        //     .andExpect(jsonPath("$.roomId").exists())
-        //     .andExpect(jsonPath("$.guestUserId").exists())
-        //     .andExpect(jsonPath("$.data").exists());
+        // DeferredResult<?> deferredResult = (DeferredResult<?>)mvcResult.getAsyncResult();
+        // assertNotNull(deferredResult);
+        assertEquals(roomGuestMap.size(), 1);
 
-        // CreateNewRoomResponse createNewRoom = response2.getBody();
+        MockAsyncContext ctx = (MockAsyncContext) mvcResult.getRequest().getAsyncContext();
+        for (AsyncListener listener : ctx.getListeners()) {
+            // logger.info(listener.toString());
+            listener.onTimeout(null);
+        }
+        
+        mockMvc.perform(asyncDispatch(mvcResult))
+            .andExpect(status().isOk());
 
-        // assertNotNull(createNewRoom);
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        CreateNewRoomResponse response = objectMapper.readValue(jsonResponse, CreateNewRoomResponse.class);
+
+        assertNull(response.getRoomId());
+        assertNull(response.getGuestUserId());
+        assertNull(response.getData());
 
         // String roomId = createNewRoom.getRoomId();
         // DeferredResult<String> guestUserId = createNewRoom.getGuestUserId();
@@ -112,9 +126,9 @@ class RoomEnterTests {
         // assertNotNull(pendingRoom);
         // assertFalse(guestUserId.hasResult());
         // assertFalse(data.hasResult());
-        // assertEquals(roomGuestMap.size(), 1);
+        
 
-        // TimeUnit.SECONDS.sleep(5);
+        
 
         // pendingRoom = roomDatabaseService.findPendingRoomById(roomId);
 
