@@ -19,6 +19,7 @@ public class RoomService {
     private final UserDatabaseService userDatabaseService;
     private final ConcurrentHashMap<String, RoomData> roomGuestMap;
     private Long deferredResultTimeout = 60000L;
+    private boolean onCompletion = true;
 
     RoomService(RoomDatabaseService roomDatabaseService, UserDatabaseService userDatabaseService, ConcurrentHashMap<String, RoomData> roomGuestMap) {
         this.roomDatabaseService = roomDatabaseService;
@@ -28,6 +29,10 @@ public class RoomService {
 
     public void setDefferedResultTimeout(Long deferredResultTimeout) {
         this.deferredResultTimeout = deferredResultTimeout;
+    }
+
+    public void enableOnCompletion(boolean onCompletion) {
+        this.onCompletion = onCompletion;
     }
 
     public List<PendingRoom> getAllRooms() {
@@ -69,19 +74,21 @@ public class RoomService {
 
         // 어떤 이유에서든(네트워크 에러, 클라이언트쪽 timeout 등) 연결이 끊긴 경우 or 처리가 완료된 경우
         guestUserId.onCompletion(() -> {
-            synchronized (roomData) {
-                if (roomData.isOpen()) {
-                    roomData.close();
-                    if (guestUserId.hasResult()) {
-                        roomDatabaseService.save(new ActiveRoom(roomId, userId, (String)guestUserId.getResult()));
+            if (onCompletion) {
+                synchronized (roomData) {
+                    if (roomData.isOpen()) {
+                        roomData.close();
+                        if (guestUserId.hasResult()) {
+                            roomDatabaseService.save(new ActiveRoom(roomId, userId, (String)guestUserId.getResult()));
+                        }
+                        else {
+                            guestUserId.setResult(null);
+                            data.setResult(null);
+                        }
                     }
-                    else {
-                        guestUserId.setResult(null);
-                        data.setResult(null);
-                    }
+                    roomGuestMap.remove(roomId);
+                    roomDatabaseService.delete(pendingRoom);
                 }
-                roomGuestMap.remove(roomId);
-                roomDatabaseService.delete(pendingRoom);
             }
         });
         return new CreateNewRoomResponse(roomId, guestUserId, data);
