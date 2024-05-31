@@ -8,7 +8,7 @@ public class RoomData {
     private String hostUserData;
     private DeferredResult<String> guestUserId;
     private DeferredResult<String> guestUserData;
-    private boolean valid;
+    private boolean open;
 
     public RoomData() {}
 
@@ -18,7 +18,7 @@ public class RoomData {
         this.hostUserData = hostUserData;
         this.guestUserId = guestUserId;
         this.guestUserData = guestUserData;
-        valid = true;
+        open = true;
     }
 
     public String getRoomId() {
@@ -61,11 +61,11 @@ public class RoomData {
         this.guestUserData = guestUserData;
     }
 
-    public void setInvalid() {
-        valid = false;
+    public void close() {
+        open = false;
     }
 
-    public boolean isValid() {
-        return valid;
+    public boolean isOpen() {
+        return open;
     }
 }

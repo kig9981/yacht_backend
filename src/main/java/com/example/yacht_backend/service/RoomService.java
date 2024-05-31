@@ -48,8 +48,8 @@ public class RoomService {
         // timeout인 경우
         guestUserId.onTimeout(() -> {
             synchronized (roomData) {
-                if(roomData.isValid()) {
-                    roomData.setInvalid();
+                if(roomData.isOpen()) {
+                    roomData.close();
                     guestUserId.setResult(null);
                     data.setResult(null);
                 }
@@ -60,8 +60,8 @@ public class RoomService {
         // 어떤 이유에서든(네트워크 에러, 클라이언트쪽 timeout 등) 연결이 끊긴 경우 or 처리가 완료된 경우
         guestUserId.onCompletion(() -> {
             synchronized (roomData) {
-                if (roomData.isValid()) {
-                    roomData.setInvalid();
+                if (roomData.isOpen()) {
+                    roomData.close();
                     if (guestUserId.hasResult()) {
                         roomDatabaseService.save(new Room(roomId, userId, (String)guestUserId.getResult()));
                     }
@@ -88,8 +88,8 @@ public class RoomService {
         }
 
         synchronized (roomData) {
-            if (roomData.isValid()) {
-                roomData.setInvalid();
+            if (roomData.isOpen()) {
+                roomData.close();
                 String hostUserData = roomData.getHostUserData();
                 DeferredResult<String> guestUserId = roomData.getGuestUserId();
                 DeferredResult<String> guestUserData = roomData.getGuestUserData();
