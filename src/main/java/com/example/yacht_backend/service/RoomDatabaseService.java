@@ -22,8 +22,8 @@ public class RoomDatabaseService {
     }
 
     @Transactional(readOnly=true)
-    public List<ActiveRoom> findAll() {
-        return activeRoomRepository.findAll();
+    public List<PendingRoom> findAllPendingRoom() {
+        return pendingRoomRepository.findAll();
     }
 
     @Transactional

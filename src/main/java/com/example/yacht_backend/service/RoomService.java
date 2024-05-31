@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 import com.example.yacht_backend.model.ActiveRoom;
+import com.example.yacht_backend.model.PendingRoom;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.domain.RoomData;
@@ -23,8 +24,8 @@ public class RoomService {
         this.userDatabaseService = userDatabaseService;
     }
 
-    public List<ActiveRoom> getAllRooms() {
-        return roomDatabaseService.findAll();
+    public List<PendingRoom> getAllRooms() {
+        return roomDatabaseService.findAllPendingRoom();
     }
     
     public CreateNewRoomResponse createNewRoom(String sessionId, String hostData) {
