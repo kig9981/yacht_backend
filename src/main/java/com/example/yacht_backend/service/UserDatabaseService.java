@@ -32,4 +32,9 @@ public class UserDatabaseService {
         }
         return user.get(0).getUserId();
     }
+
+    @Transactional(readOnly = true)
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
 }
