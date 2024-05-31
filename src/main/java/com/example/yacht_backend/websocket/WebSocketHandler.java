@@ -11,8 +11,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.example.yacht_backend.dto.WebSocketMessage;
-import com.example.yacht_backend.model.ActiveGames;
-import com.example.yacht_backend.repository.ActiveGamesRepository;
+import com.example.yacht_backend.model.ActiveRoom;
+import com.example.yacht_backend.repository.ActiveRoomRepository;
 import com.example.yacht_backend.service.RoomDatabaseService;
 import com.example.yacht_backend.service.RoomService;
 

@@ -5,31 +5,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import com.example.yacht_backend.repository.ActiveGamesRepository;
+import com.example.yacht_backend.repository.ActiveRoomRepository;
 import com.example.yacht_backend.exception.RoomNotFoundException;
-import com.example.yacht_backend.model.ActiveGames;
+import com.example.yacht_backend.model.ActiveRoom;
 
 @Service
 public class RoomDatabaseService {
-    private final ActiveGamesRepository roomRepository;
+    private final ActiveRoomRepository roomRepository;
 
-    RoomDatabaseService(ActiveGamesRepository roomRepository) {
+    RoomDatabaseService(ActiveRoomRepository roomRepository) {
         this.roomRepository = roomRepository;
     }
 
     @Transactional(readOnly=true)
-    public List<ActiveGames> findAll() {
+    public List<ActiveRoom> findAll() {
         return roomRepository.findAll();
     }
 
     @Transactional
-    public ActiveGames save(ActiveGames room) {
+    public ActiveRoom save(ActiveRoom room) {
         return roomRepository.save(room);
     }
     
     @Transactional
-    public ActiveGames addGuestUserToRoom(String hostUserId, String guestUserId) throws RoomNotFoundException {
-        ActiveGames hostRoom = findRoomByHostUserId(hostUserId);
+    public ActiveRoom addGuestUserToRoom(String hostUserId, String guestUserId) throws RoomNotFoundException {
+        ActiveRoom hostRoom = findRoomByHostUserId(hostUserId);
         if (hostRoom.getHostUserId() != hostUserId) {
             throw new RoomNotFoundException("invalid room info(host)");
         }
@@ -38,41 +38,41 @@ public class RoomDatabaseService {
     }
 
     @Transactional(readOnly=true)
-    public ActiveGames findRoomByHostUserId(String hostUserId) {
+    public ActiveRoom findRoomByHostUserId(String hostUserId) {
         if (hostUserId == null) {
             return null;
         }
-        List<ActiveGames> hostRooms = roomRepository.findByHostUserId(hostUserId);
+        List<ActiveRoom> hostRooms = roomRepository.findByHostUserId(hostUserId);
         if (hostRooms.isEmpty()) {
             return null;
         }
-        ActiveGames hostRoom = hostRooms.get(0); 
+        ActiveRoom hostRoom = hostRooms.get(0); 
         return hostRoom;
     }
 
     @Transactional(readOnly=true)
-    public ActiveGames findRoomByGuestUserId(String guestUserId) {
+    public ActiveRoom findRoomByGuestUserId(String guestUserId) {
         if (guestUserId == null) {
             return null;
         }
-        List<ActiveGames> guestRooms = roomRepository.findByGuestUserId(guestUserId);
+        List<ActiveRoom> guestRooms = roomRepository.findByGuestUserId(guestUserId);
         if (guestRooms.isEmpty()) {
             return null;
         }
-        ActiveGames guestRoom = guestRooms.get(0); 
+        ActiveRoom guestRoom = guestRooms.get(0); 
         return guestRoom;
     }
 
     @Transactional(readOnly=true)
-    public ActiveGames findRoomById(String roomId) {
+    public ActiveRoom findRoomById(String roomId) {
         if (roomId == null) {
             return null;
         }
-        List<ActiveGames> rooms = roomRepository.findByRoomId(roomId);
+        List<ActiveRoom> rooms = roomRepository.findByRoomId(roomId);
         if (rooms.isEmpty()) {
             return null;
         }
-        ActiveGames room = rooms.get(0); 
+        ActiveRoom room = rooms.get(0); 
         return room;
     }
 
