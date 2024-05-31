@@ -40,7 +40,7 @@ public class ApiController {
     
     @PostMapping("/rooms/{roomId}/enter")
     public EnterRoomResponse enterRoom(@PathVariable String roomId, @RequestBody EnterRoomRequest enterRoomRequest) throws Exception {
-        return apiService.enterRoom(enterRoomRequest.getRoomId(), enterRoomRequest.getUserId());
+        return apiService.enterRoom(roomId, enterRoomRequest.getUserId());
     }
 
     @DeleteMapping("/leave-room")
