@@ -12,7 +12,9 @@ import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.dto.EnterRoomRequest;
 import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.model.Room;
+import com.example.yacht_backend.model.User;
 import com.example.yacht_backend.service.RoomService;
+import com.example.yacht_backend.service.UserService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,10 +24,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 public class ApiController {
     private final RoomService roomService;
+    private final UserService userService;
 
-    ApiController(RoomService roomService) {
+    ApiController(RoomService roomService, UserService userService) {
         this.roomService = roomService;
+        this.userService = userService;
     }
+
+    @PostMapping("/users")
+    public User createUser() {
+        return userService.createUser();
+    }
+    
 
     @GetMapping("/rooms")
     public List<Room> getAllRooms() {
