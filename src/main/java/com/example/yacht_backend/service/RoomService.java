@@ -45,6 +45,8 @@ public class RoomService {
         
         RoomData roomData = new RoomData(roomId, userId, hostData, guestUserId, data);
         roomGuestMap.put(roomId, roomData);
+        PendingRoom pendingRoom = new PendingRoom(roomId, userId, hostData);
+        roomDatabaseService.save(pendingRoom);
 
         // timeout인 경우
         guestUserId.onTimeout(() -> {
@@ -55,6 +57,7 @@ public class RoomService {
                     data.setResult(null);
                 }
                 roomGuestMap.remove(roomId);
+                roomDatabaseService.delete(pendingRoom);
             }
         });
 
@@ -72,6 +75,7 @@ public class RoomService {
                     }
                 }
                 roomGuestMap.remove(roomId);
+                roomDatabaseService.delete(pendingRoom);
             }
         });
         return new CreateNewRoomResponse(roomId, guestUserId, data);
