@@ -11,6 +11,7 @@ import com.example.yacht_backend.service.RoomDatabaseService;
 import com.example.yacht_backend.service.UserDatabaseService;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.model.ActiveRoom;
+import com.example.yacht_backend.model.PendingRoom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
@@ -37,9 +38,9 @@ class RoomServiceTests {
 
 	@Test
 	void testGetAllRooms() throws Exception {
-		given(roomDatabaseService.findAll()).willReturn(Collections.emptyList());
+		given(roomDatabaseService.findAllPendingRoom()).willReturn(Collections.emptyList());
 
-        List<ActiveRoom> allRooms = roomService.getAllRooms();
+        List<PendingRoom> allRooms = roomService.getAllRooms();
 
         assertEquals(allRooms, Collections.emptyList());
 	}
