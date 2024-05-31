@@ -10,10 +10,10 @@ import com.example.yacht_backend.exception.RoomNotFoundException;
 import com.example.yacht_backend.model.Room;
 
 @Service
-public class ApiDatabaseService {
+public class RoomDatabaseService {
     private final RoomRepository roomRepository;
 
-    ApiDatabaseService(RoomRepository roomRepository) {
+    RoomDatabaseService(RoomRepository roomRepository) {
         this.roomRepository = roomRepository;
     }
 

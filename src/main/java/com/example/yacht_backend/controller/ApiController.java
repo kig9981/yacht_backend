@@ -12,35 +12,34 @@ import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.dto.EnterRoomRequest;
 import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.model.Room;
-import com.example.yacht_backend.service.ApiService;
+import com.example.yacht_backend.service.RoomService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 
 
 @RestController
 public class ApiController {
-    private final ApiService apiService;
+    private final RoomService roomService;
 
-    ApiController(ApiService apiService) {
-        this.apiService = apiService;
+    ApiController(RoomService roomService) {
+        this.roomService = roomService;
     }
 
     @GetMapping("/rooms")
     public List<Room> getAllRooms() {
-        return apiService.getAllRooms();
+        return roomService.getAllRooms();
     }
 
     @PostMapping("/rooms/wait")
     public CreateNewRoomResponse createNewRoom(@RequestBody CreateNewRoomRequest createNewRoomRequest) {
-        return apiService.createNewRoom(createNewRoomRequest.getUserId());
+        return roomService.createNewRoom(createNewRoomRequest.getUserId());
     }
     
     @PostMapping("/rooms/{roomId}/enter")
     public EnterRoomResponse enterRoom(@PathVariable String roomId, @RequestBody EnterRoomRequest enterRoomRequest) throws Exception {
-        return apiService.enterRoom(roomId, enterRoomRequest.getUserId());
+        return roomService.enterRoom(roomId, enterRoomRequest.getUserId());
     }
 
     @DeleteMapping("/leave-room")

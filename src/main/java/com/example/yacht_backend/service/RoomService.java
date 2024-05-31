@@ -13,63 +13,53 @@ import com.example.yacht_backend.exception.RoomNotFoundException;
 
 
 @Service
-public class ApiService {
-    private final ApiDatabaseService apiDatabaseService;
+public class RoomService {
+    private final RoomDatabaseService roomDatabaseService;
     private final ConcurrentHashMap<String, DeferredResult<String>> roomGuestMap = new ConcurrentHashMap<>();
 
-    ApiService(ApiDatabaseService apiDatabaseService) {
-        this.apiDatabaseService = apiDatabaseService;
+    RoomService(RoomDatabaseService roomDatabaseService) {
+        this.roomDatabaseService = roomDatabaseService;
     }
 
     public List<Room> getAllRooms() {
-        return apiDatabaseService.findAll();
+        return roomDatabaseService.findAll();
     }
     
     public CreateNewRoomResponse createNewRoom(String userId) {
-        Room hostRoom = apiDatabaseService.findRoomByHostUserId(userId);
-        Room guestRoom = apiDatabaseService.findRoomByGuestUserId(userId);
+        Room guestRoom = roomDatabaseService.findRoomByGuestUserId(userId);
         if (guestRoom != null) {
             DeferredResult<String> guestId = new DeferredResult<String>(60000L);
             guestId.setResult(null);
             return new CreateNewRoomResponse(null, guestId);
         }
-        String tempRoomId = null;
-        if (hostRoom != null) {
-            tempRoomId = hostRoom.getRoomId();
-        }
-        else {
-            tempRoomId = UUID.randomUUID().toString();
-            Room newRoom = new Room(tempRoomId, userId, null);
-            apiDatabaseService.save(newRoom);
-        }
-        String roomId = tempRoomId;
-        DeferredResult<String> guestId = new DeferredResult<String>(60000L);
+        String roomId = UUID.randomUUID().toString();
+        DeferredResult<String> guestUserId = new DeferredResult<String>(60000L);
         
-        roomGuestMap.put(roomId, guestId);
-        guestId.onTimeout(() -> {
-            synchronized (guestId) {
+        roomGuestMap.put(roomId, guestUserId);
+        guestUserId.onTimeout(() -> {
+            synchronized (guestUserId) {
                 roomGuestMap.remove(roomId);
-                guestId.setResult(null);
+                guestUserId.setResult(null);
             }
         });
 
-        guestId.onCompletion(() -> {
-            synchronized (guestId) {
-                if (!guestId.hasResult()) {
+        guestUserId.onCompletion(() -> {
+            synchronized (guestUserId) {
+                if (!guestUserId.hasResult()) {
                     roomGuestMap.remove(roomId);
-                    guestId.setResult(null);
+                    guestUserId.setResult(null);
                 }
             }
         });
-        return new CreateNewRoomResponse(roomId, guestId);
+        return new CreateNewRoomResponse(roomId, guestUserId);
     }
 
     public EnterRoomResponse enterRoom(String roomId, String userId) {
-        Room room = apiDatabaseService.findRoomById(roomId);
+        Room room = roomDatabaseService.findRoomById(roomId);
         if (room == null) {
             return new EnterRoomResponse("Room Not Exists", false);
         }
-        if(apiDatabaseService.isUserInRoom(userId)) {
+        if(roomDatabaseService.isUserInRoom(userId)) {
             return new EnterRoomResponse("Already in room", false);
         }
         DeferredResult<String> guestResult = roomGuestMap.get(roomId);
@@ -84,7 +74,7 @@ public class ApiService {
             }
             String hostUserId = room.getHostUserId();
             try {
-                apiDatabaseService.addGuestUserToRoom(hostUserId, userId);
+                roomDatabaseService.addGuestUserToRoom(hostUserId, userId);
             }
             catch (RoomNotFoundException e) {
                 return new EnterRoomResponse("unknown error", false);

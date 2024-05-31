@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.example.yacht_backend.dto.CreateNewRoomRequest;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
-import com.example.yacht_backend.service.ApiService;
+import com.example.yacht_backend.service.RoomService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.http.MediaType;
@@ -28,20 +28,20 @@ import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class ControllerTests {
+class RoomControllerTests {
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
-	private ApiService apiService;
+	private RoomService roomService;
 
 	@Autowired
     private ObjectMapper objectMapper;
 
 	@Test
 	void testGetAllRooms() throws Exception {
-		given(apiService.getAllRooms()).willReturn(Collections.emptyList());
+		given(roomService.getAllRooms()).willReturn(Collections.emptyList());
 
 		mockMvc.perform(get("/get-all-rooms")
 			.contentType(MediaType.APPLICATION_JSON))
@@ -60,7 +60,7 @@ class ControllerTests {
 		deferredGuestId.setResult(guestId.toString());
 		CreateNewRoomRequest createNewRoomRequest = new CreateNewRoomRequest(userId.toString());
 		CreateNewRoomResponse createNewRoomResponse = new CreateNewRoomResponse(roomId.toString(), deferredGuestId);
-		given(apiService.createNewRoom(createNewRoomRequest.getUserId())).willReturn(createNewRoomResponse);
+		given(roomService.createNewRoom(createNewRoomRequest.getUserId())).willReturn(createNewRoomResponse);
 
 		mockMvc.perform(post("/create-new-room")
 			.contentType(MediaType.APPLICATION_JSON)

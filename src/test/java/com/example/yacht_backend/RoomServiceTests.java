@@ -6,8 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.example.yacht_backend.service.ApiService;
-import com.example.yacht_backend.service.ApiDatabaseService;
+import com.example.yacht_backend.service.RoomService;
+import com.example.yacht_backend.service.RoomDatabaseService;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.model.Room;
 
@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Collections;
 import java.util.UUID;
 
-class ApiServiceTests {
+class RoomServiceTests {
 	@InjectMocks
-	private ApiService apiService;
+	private RoomService roomService;
 
     @Mock
-    private ApiDatabaseService apiDatabaseService;
+    private RoomDatabaseService roomDatabaseService;
 
     @BeforeEach
     void initialize() {
@@ -33,9 +33,9 @@ class ApiServiceTests {
 
 	@Test
 	void testGetAllRooms() throws Exception {
-		given(apiDatabaseService.findAll()).willReturn(Collections.emptyList());
+		given(roomDatabaseService.findAll()).willReturn(Collections.emptyList());
 
-        List<Room> allRooms = apiService.getAllRooms();
+        List<Room> allRooms = roomService.getAllRooms();
 
         assertEquals(allRooms, Collections.emptyList());
 	}
@@ -48,12 +48,12 @@ class ApiServiceTests {
 
 		mockStatic(UUID.class);
 
-		given(apiDatabaseService.findRoomByHostUserId(userId)).willReturn(null);
-		given(apiDatabaseService.findRoomByGuestUserId(userId)).willReturn(null);
-		given(apiDatabaseService.save(newRoom)).willReturn(newRoom);
+		given(roomDatabaseService.findRoomByHostUserId(userId)).willReturn(null);
+		given(roomDatabaseService.findRoomByGuestUserId(userId)).willReturn(null);
+		given(roomDatabaseService.save(newRoom)).willReturn(newRoom);
 		given(UUID.randomUUID()).willReturn(roomId);
 
-		CreateNewRoomResponse createNewRoomResponse = apiService.createNewRoom(userId);
+		CreateNewRoomResponse createNewRoomResponse = roomService.createNewRoom(userId);
 
 		assertEquals(createNewRoomResponse.getRoomId(), roomId.toString());
 	}
