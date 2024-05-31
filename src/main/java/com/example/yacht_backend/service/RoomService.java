@@ -18,11 +18,16 @@ public class RoomService {
     private final RoomDatabaseService roomDatabaseService;
     private final UserDatabaseService userDatabaseService;
     private final ConcurrentHashMap<String, RoomData> roomGuestMap;
+    private Long deferredResultTimeout = 60000L;
 
     RoomService(RoomDatabaseService roomDatabaseService, UserDatabaseService userDatabaseService, ConcurrentHashMap<String, RoomData> roomGuestMap) {
         this.roomDatabaseService = roomDatabaseService;
         this.userDatabaseService = userDatabaseService;
         this.roomGuestMap = roomGuestMap;
+    }
+
+    public void setDefferedResultTimeout(Long deferredResultTimeout) {
+        this.deferredResultTimeout = deferredResultTimeout;
     }
 
     public List<PendingRoom> getAllRooms() {
@@ -34,14 +39,14 @@ public class RoomService {
         ActiveRoom guestRoom = roomDatabaseService.findRoomByGuestUserId(userId);
         
         if (guestRoom != null) {
-            DeferredResult<String> guestId = new DeferredResult<String>(60000L);
+            DeferredResult<String> guestId = new DeferredResult<String>(deferredResultTimeout);
             guestId.setResult(null);
-            DeferredResult<String> data = new DeferredResult<String>(60000L);
+            DeferredResult<String> data = new DeferredResult<String>(deferredResultTimeout);
             data.setResult(null);
             return new CreateNewRoomResponse(null, guestId, data);
         }
         String roomId = UUID.randomUUID().toString(); // 임시로 임의의 룸을 생성
-        DeferredResult<String> guestUserId = new DeferredResult<String>(60000L);
+        DeferredResult<String> guestUserId = new DeferredResult<String>(deferredResultTimeout);
         DeferredResult<String> data = new DeferredResult<String>();
         
         RoomData roomData = new RoomData(roomId, userId, hostData, guestUserId, data);
