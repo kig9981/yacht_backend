@@ -2,22 +2,22 @@ package com.example.yacht_backend.domain;
 
 import org.springframework.web.context.request.async.DeferredResult;
 
+import com.example.yacht_backend.dto.CreateNewRoomResponse;
+
 public class RoomData {
     private String roomId;
     private String hostUserId;
     private String hostUserData;
-    private DeferredResult<String> guestUserId;
-    private DeferredResult<String> guestUserData;
+    private DeferredResult<CreateNewRoomResponse> createNewRoomResponse;
     private boolean open;
 
     public RoomData() {}
 
-    public RoomData(String roomId, String hostUserId, String hostUserData, DeferredResult<String> guestUserId, DeferredResult<String> guestUserData) {
+    public RoomData(String roomId, String hostUserId, String hostUserData, DeferredResult<CreateNewRoomResponse> createNewRoomResponse) {
         this.roomId = roomId;
         this.hostUserId = hostUserId;
         this.hostUserData = hostUserData;
-        this.guestUserId = guestUserId;
-        this.guestUserData = guestUserData;
+        this.createNewRoomResponse = createNewRoomResponse;
         open = true;
     }
 
@@ -45,20 +45,12 @@ public class RoomData {
         this.hostUserData = hostUserData;
     }
 
-    public DeferredResult<String> getGuestUserId() {
-        return guestUserId;
+    public DeferredResult<CreateNewRoomResponse> getCreateNewRoomResponse() {
+        return createNewRoomResponse;
     }
 
-    public void setGuestUserId(DeferredResult<String> guestUserId) {
-        this.guestUserId = guestUserId;
-    }
-
-    public DeferredResult<String> getGuestUserData() {
-        return guestUserData;
-    }
-
-    public void setGuestUserData(DeferredResult<String> guestUserData) {
-        this.guestUserData = guestUserData;
+    public void setCreateNewRoomResponse(DeferredResult<CreateNewRoomResponse> createNewRoomResponse) {
+        this.createNewRoomResponse = createNewRoomResponse;
     }
 
     public void close() {
