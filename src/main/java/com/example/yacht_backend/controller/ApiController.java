@@ -35,21 +35,6 @@ public class ApiController {
     public User createUser() {
         return userService.createUser();
     }
-    
-    @GetMapping("/rooms")
-    public List<Room> getAllRooms() {
-        return roomService.getAllRooms();
-    }
-
-    @PostMapping("/rooms/wait")
-    public CreateNewRoomResponse createNewRoom(@RequestBody CreateNewRoomRequest createNewRoomRequest) {
-        return roomService.createNewRoom(createNewRoomRequest.getSessionId(), createNewRoomRequest.getData());
-    }
-    
-    @PostMapping("/rooms/{roomId}/enter")
-    public EnterRoomResponse enterRoom(@PathVariable String roomId, @RequestBody EnterRoomRequest enterRoomRequest) throws Exception {
-        return roomService.enterRoom(roomId, enterRoomRequest.getSessionId(), enterRoomRequest.getData());
-    }
 
     @DeleteMapping("/leave-room")
     public void leaveRoom(@RequestBody String entity) {
