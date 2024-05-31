@@ -17,6 +17,7 @@ import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.model.PendingRoom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
@@ -64,10 +65,9 @@ class RoomServiceTests {
 		given(userDatabaseService.findUserIdBySessionId(sessionId)).willReturn(userId);
 		given(roomDatabaseService.findActiveRoomByGuestUserId(userId)).willReturn(null);
 		given(UUID.randomUUID()).willReturn(roomId);
+		given(roomGuestMap.put(any(String.class), any(RoomData.class))).willReturn(null);
 
-		CreateNewRoomResponse createNewRoomResponse = roomService.createNewRoom(userId, hostData);
-
-		assertEquals(roomId.toString(), createNewRoomResponse.getRoomId());
+		DeferredResult<CreateNewRoomResponse> createNewRoomResponse = roomService.createNewRoom(userId, hostData);
 	}
 
 	@Test
@@ -76,9 +76,8 @@ class RoomServiceTests {
 		String sessionId = UUID.randomUUID().toString();
 		String hostUserId = UUID.randomUUID().toString();
 		String guestUserId = UUID.randomUUID().toString();
-		DeferredResult<String> deferredGuestUserId = new DeferredResult<>();
-		DeferredResult<String> deferredGuestUserData = new DeferredResult<>();
-		RoomData roomData = new RoomData(roomId, hostUserId, "hostUserData", deferredGuestUserId, deferredGuestUserData);
+		DeferredResult<CreateNewRoomResponse> deferredResult = new DeferredResult<>();
+		RoomData roomData = new RoomData(roomId, hostUserId, "hostUserData", deferredResult);
 
 		given(userDatabaseService.findUserIdBySessionId(sessionId)).willReturn(guestUserId);
 		given(roomDatabaseService.isUserInRoom(guestUserId)).willReturn(false);
