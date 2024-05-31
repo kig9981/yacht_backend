@@ -40,6 +40,8 @@ public class RoomService {
         DeferredResult<String> guestUserId = new DeferredResult<String>(60000L);
         
         roomGuestMap.put(roomId, guestUserId);
+
+        // timeout인 경우
         guestUserId.onTimeout(() -> {
             synchronized (guestUserId) {
                 roomGuestMap.remove(roomId);
@@ -47,6 +49,7 @@ public class RoomService {
             }
         });
 
+        // 어떤 이유에서든(네트워크 에러, 클라이언트쪽 timeout 등) 연결이 끊긴 경우
         guestUserId.onCompletion(() -> {
             synchronized (guestUserId) {
                 if (!guestUserId.hasResult()) {
@@ -58,7 +61,8 @@ public class RoomService {
         return new CreateNewRoomResponse(roomId, guestUserId);
     }
 
-    public EnterRoomResponse enterRoom(String roomId, String userId) {
+    public EnterRoomResponse enterRoom(String roomId, String sessionId) {
+        String userId = userDatabaseService.findUserIdBySessionId(sessionId);
         Room room = roomDatabaseService.findRoomById(roomId);
         if (room == null) {
             return new EnterRoomResponse("Room Not Exists", false);
