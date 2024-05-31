@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import com.example.yacht_backend.dto.CreateNewRoomRequest;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.dto.EnterRoomRequest;
 import com.example.yacht_backend.dto.EnterRoomResponse;
-import com.example.yacht_backend.model.ActiveRoom;
 import com.example.yacht_backend.model.PendingRoom;
 import com.example.yacht_backend.service.RoomService;
 
@@ -32,7 +32,7 @@ public class RoomController {
     }
 
     @PostMapping("/wait")
-    public CreateNewRoomResponse createNewRoom(@RequestBody CreateNewRoomRequest createNewRoomRequest) {
+    public DeferredResult<CreateNewRoomResponse> createNewRoom(@RequestBody CreateNewRoomRequest createNewRoomRequest) {
         return roomService.createNewRoom(createNewRoomRequest.getSessionId(), createNewRoomRequest.getData());
     }
     
