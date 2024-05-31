@@ -27,14 +27,16 @@ public class RoomService {
         return roomDatabaseService.findAll();
     }
     
-    public CreateNewRoomResponse createNewRoom(String userId) {
+    public CreateNewRoomResponse createNewRoom(String sessionId) {
+        String userId = userDatabaseService.findUserIdBySessionId(sessionId);
         Room guestRoom = roomDatabaseService.findRoomByGuestUserId(userId);
+        
         if (guestRoom != null) {
             DeferredResult<String> guestId = new DeferredResult<String>(60000L);
             guestId.setResult(null);
             return new CreateNewRoomResponse(null, guestId);
         }
-        String roomId = UUID.randomUUID().toString();
+        String roomId = UUID.randomUUID().toString(); // 임시로 임의의 룸을 생성
         DeferredResult<String> guestUserId = new DeferredResult<String>(60000L);
         
         roomGuestMap.put(roomId, guestUserId);
