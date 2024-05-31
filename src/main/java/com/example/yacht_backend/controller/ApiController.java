@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.yacht_backend.dto.CreateNewRoomRequest;
@@ -27,18 +28,18 @@ public class ApiController {
         this.apiService = apiService;
     }
 
-    @GetMapping("/get-all-rooms")
+    @GetMapping("/rooms")
     public List<Room> getAllRooms() {
         return apiService.getAllRooms();
     }
 
-    @PostMapping("/create-new-room")
+    @PostMapping("/rooms/wait")
     public CreateNewRoomResponse createNewRoom(@RequestBody CreateNewRoomRequest createNewRoomRequest) {
         return apiService.createNewRoom(createNewRoomRequest.getUserId());
     }
     
-    @PostMapping("/enter-room")
-    public EnterRoomResponse enterRoom(@RequestBody EnterRoomRequest enterRoomRequest) throws Exception {
+    @PostMapping("/rooms/{roomId}/enter")
+    public EnterRoomResponse enterRoom(@PathVariable String roomId, @RequestBody EnterRoomRequest enterRoomRequest) throws Exception {
         return apiService.enterRoom(enterRoomRequest.getRoomId(), enterRoomRequest.getUserId());
     }
 
