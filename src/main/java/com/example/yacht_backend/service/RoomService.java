@@ -90,7 +90,7 @@ public class RoomService {
         synchronized (roomData) {
             if (roomData.isOpen()) {
                 roomData.close();
-                String hostUserData = roomData.getHostUserData();
+                String hostUserId = roomData.getHostUserData();
                 DeferredResult<String> guestUserId = roomData.getGuestUserId();
                 DeferredResult<String> guestUserData = roomData.getGuestUserData();
                 if (guestUserId.hasResult()) {
@@ -99,7 +99,7 @@ public class RoomService {
                 guestUserId.setResult(userId);
                 guestUserData.setResult(guestData);
                 
-                return new EnterRoomResponse(hostUserData, true);
+                return new EnterRoomResponse(hostUserId, true);
             }
             return new EnterRoomResponse("Room is full", false);
         }
