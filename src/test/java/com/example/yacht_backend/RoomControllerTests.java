@@ -9,6 +9,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.yacht_backend.dto.CreateNewRoomRequest;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
+import com.example.yacht_backend.dto.EnterRoomRequest;
+import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.service.RoomService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -70,6 +72,26 @@ class RoomControllerTests {
 			.andExpect(jsonPath("$.roomId").value(roomId.toString()))
 			.andDo(print());
 			
+	}
+
+	@Test
+	void testEnterRoom() throws Exception {
+		UUID roomId = UUID.randomUUID();
+		UUID sessionId = UUID.randomUUID();
+		UUID userId = UUID.randomUUID();
+		EnterRoomRequest enterRoomRequest = new EnterRoomRequest(sessionId.toString(), "data");
+		EnterRoomResponse enterRoomResponse = new EnterRoomResponse("", true);
+
+		given(roomService.enterRoom(roomId.toString(), sessionId.toString(), "data")).willReturn(enterRoomResponse);
+
+		mockMvc.perform(post("/rooms/" + roomId.toString() + "/enter")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(enterRoomRequest)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isAccepted").value(true))
+			.andExpect(jsonPath("$.response").value(""))
+			.andDo(print());
+
 	}
 
 }
