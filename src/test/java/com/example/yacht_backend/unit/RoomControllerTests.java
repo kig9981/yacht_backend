@@ -48,8 +48,8 @@ class RoomControllerTests {
 			.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$").isArray())
-			.andExpect(jsonPath("$").isEmpty())
-			.andDo(print());
+			.andExpect(jsonPath("$").isEmpty());
+			// .andDo(print());
 	}
 
 	@Test
@@ -69,8 +69,8 @@ class RoomControllerTests {
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(createNewRoomRequest)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.roomId").value(roomId.toString()))
-			.andDo(print());
+			.andExpect(jsonPath("$.roomId").value(roomId.toString()));
+			// .andDo(print());
 			
 	}
 
@@ -89,8 +89,8 @@ class RoomControllerTests {
 			.content(objectMapper.writeValueAsString(enterRoomRequest)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.isAccepted").value(true))
-			.andExpect(jsonPath("$.response").value(""))
-			.andDo(print());
+			.andExpect(jsonPath("$.response").value(""));
+			// .andDo(print());
 
 	}
 
