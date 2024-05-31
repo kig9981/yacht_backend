@@ -39,6 +39,9 @@ public class RoomDatabaseService {
 
     @Transactional(readOnly=true)
     public Room findRoomByHostUserId(String hostUserId) {
+        if (hostUserId == null) {
+            return null;
+        }
         List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
         if (hostRooms.isEmpty()) {
             return null;
@@ -49,6 +52,9 @@ public class RoomDatabaseService {
 
     @Transactional(readOnly=true)
     public Room findRoomByGuestUserId(String guestUserId) {
+        if (guestUserId == null) {
+            return null;
+        }
         List<Room> guestRooms = roomRepository.findByGuestUserId(guestUserId);
         if (guestRooms.isEmpty()) {
             return null;
@@ -59,6 +65,9 @@ public class RoomDatabaseService {
 
     @Transactional(readOnly=true)
     public Room findRoomById(String roomId) {
+        if (roomId == null) {
+            return null;
+        }
         List<Room> rooms = roomRepository.findByRoomId(roomId);
         if (rooms.isEmpty()) {
             return null;

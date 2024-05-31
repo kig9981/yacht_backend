@@ -23,6 +23,9 @@ public class UserDatabaseService {
 
     @Transactional(readOnly = true)
     String findUserIdBySessionId(String sessionId) {
+        if (sessionId == null) {
+            return null;
+        }
         List<User> user = userRepository.findBySessionId(sessionId);
         if (user.isEmpty()) {
             return null;
