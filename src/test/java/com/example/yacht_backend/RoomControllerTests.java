@@ -60,7 +60,7 @@ class RoomControllerTests {
 		deferredGuestId.setResult(guestId.toString());
 		CreateNewRoomRequest createNewRoomRequest = new CreateNewRoomRequest(userId.toString());
 		CreateNewRoomResponse createNewRoomResponse = new CreateNewRoomResponse(roomId.toString(), deferredGuestId);
-		given(roomService.createNewRoom(createNewRoomRequest.getUserId())).willReturn(createNewRoomResponse);
+		given(roomService.createNewRoom(createNewRoomRequest.getSessionId())).willReturn(createNewRoomResponse);
 
 		mockMvc.perform(post("/create-new-room")
 			.contentType(MediaType.APPLICATION_JSON)

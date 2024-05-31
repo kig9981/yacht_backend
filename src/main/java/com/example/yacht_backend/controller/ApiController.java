@@ -44,7 +44,7 @@ public class ApiController {
 
     @PostMapping("/rooms/wait")
     public CreateNewRoomResponse createNewRoom(@RequestBody CreateNewRoomRequest createNewRoomRequest) {
-        return roomService.createNewRoom(createNewRoomRequest.getUserId());
+        return roomService.createNewRoom(createNewRoomRequest.getSessionId());
     }
     
     @PostMapping("/rooms/{roomId}/enter")
