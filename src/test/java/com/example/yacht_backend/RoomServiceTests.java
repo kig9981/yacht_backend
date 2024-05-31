@@ -8,6 +8,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.example.yacht_backend.service.RoomService;
 import com.example.yacht_backend.service.RoomDatabaseService;
+import com.example.yacht_backend.service.UserDatabaseService;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.model.Room;
 
@@ -26,6 +27,9 @@ class RoomServiceTests {
     @Mock
     private RoomDatabaseService roomDatabaseService;
 
+	@Mock
+    private UserDatabaseService userDatabaseService;
+
     @BeforeEach
     void initialize() {
         MockitoAnnotations.openMocks(this);
@@ -43,17 +47,18 @@ class RoomServiceTests {
 	@Test
 	void testCreateNewRoom() throws Exception {
         UUID roomId = UUID.randomUUID();
+		String sessionId = UUID.randomUUID().toString();
 		String userId = UUID.randomUUID().toString();
-		Room newRoom = new Room(roomId.toString(), userId, null);
+		String hostData = "data";
 
 		mockStatic(UUID.class);
 
+		given(userDatabaseService.findUserIdBySessionId(sessionId)).willReturn(userId);
 		given(roomDatabaseService.findRoomByHostUserId(userId)).willReturn(null);
 		given(roomDatabaseService.findRoomByGuestUserId(userId)).willReturn(null);
-		given(roomDatabaseService.save(newRoom)).willReturn(newRoom);
 		given(UUID.randomUUID()).willReturn(roomId);
 
-		CreateNewRoomResponse createNewRoomResponse = roomService.createNewRoom(userId);
+		CreateNewRoomResponse createNewRoomResponse = roomService.createNewRoom(userId, hostData);
 
 		assertEquals(createNewRoomResponse.getRoomId(), roomId.toString());
 	}

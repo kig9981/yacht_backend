@@ -43,7 +43,7 @@ class RoomControllerTests {
 	void testGetAllRooms() throws Exception {
 		given(roomService.getAllRooms()).willReturn(Collections.emptyList());
 
-		mockMvc.perform(get("/get-all-rooms")
+		mockMvc.perform(get("/rooms")
 			.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$").isArray())
@@ -57,12 +57,14 @@ class RoomControllerTests {
 		UUID roomId = UUID.randomUUID();
 		UUID guestId = UUID.randomUUID();
 		DeferredResult<String> deferredGuestId = new DeferredResult<>();
+		DeferredResult<String> deferredData = new DeferredResult<>();
 		deferredGuestId.setResult(guestId.toString());
-		CreateNewRoomRequest createNewRoomRequest = new CreateNewRoomRequest(userId.toString());
-		CreateNewRoomResponse createNewRoomResponse = new CreateNewRoomResponse(roomId.toString(), deferredGuestId);
-		given(roomService.createNewRoom(createNewRoomRequest.getSessionId())).willReturn(createNewRoomResponse);
+		deferredData.setResult("data");
+		CreateNewRoomRequest createNewRoomRequest = new CreateNewRoomRequest(userId.toString(), "data");
+		CreateNewRoomResponse createNewRoomResponse = new CreateNewRoomResponse(roomId.toString(), deferredGuestId, deferredData);
+		given(roomService.createNewRoom(createNewRoomRequest.getSessionId(), "data")).willReturn(createNewRoomResponse);
 
-		mockMvc.perform(post("/create-new-room")
+		mockMvc.perform(post("/rooms/wait")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(createNewRoomRequest)))
 			.andExpect(status().isOk())
