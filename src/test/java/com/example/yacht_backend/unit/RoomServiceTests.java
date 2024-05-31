@@ -1,4 +1,4 @@
-package com.example.yacht_backend;
+package com.example.yacht_backend.unit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
