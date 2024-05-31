@@ -4,13 +4,13 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 public class CreateNewRoomResponse {
     private String roomId;
-    private DeferredResult<String> guestId;
+    private DeferredResult<String> guestUserId;
 
     public CreateNewRoomResponse() {}
 
-    public CreateNewRoomResponse(String roomId, DeferredResult<String> guestId) {
+    public CreateNewRoomResponse(String roomId, DeferredResult<String> guestUserId) {
         this.roomId = roomId;
-        this.guestId = guestId;
+        this.guestUserId = guestUserId;
     }
 
     public String getRoomId() {
@@ -21,11 +21,11 @@ public class CreateNewRoomResponse {
         this.roomId = roomId;
     }
 
-    public DeferredResult<String> getGuestId() {
-        return this.guestId;
+    public DeferredResult<String> getGuestUserId() {
+        return this.guestUserId;
     }
 
-    public void setGuestId(DeferredResult<String> guestId) {
-        this.guestId = guestId;
+    public void setGuestUserId(DeferredResult<String> guestUserId) {
+        this.guestUserId = guestUserId;
     }
 }
