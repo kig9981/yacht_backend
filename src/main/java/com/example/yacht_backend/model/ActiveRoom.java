@@ -13,7 +13,7 @@ import jakarta.persistence.Version;
     @UniqueConstraint(columnNames = "roomId"),
     @UniqueConstraint(columnNames = {"hostUserId", "guestUserId"})
 })
-public class Room {
+public class ActiveRoom {
     private @Id
     @GeneratedValue Long id;
     @Column(unique = true)
@@ -26,9 +26,9 @@ public class Room {
     @Version
     private Integer version;
 
-    public Room() {}
+    public ActiveRoom() {}
 
-    public Room(String roomId, String hostUserId, String guestUserId) {
+    public ActiveRoom(String roomId, String hostUserId, String guestUserId) {
         this.roomId = roomId;
         this.hostUserId = hostUserId;
         this.guestUserId = guestUserId;

@@ -2,29 +2,29 @@ package com.example.yacht_backend.dto;
 
 
 public class EnterRoomRequest {
-    private String roomId;
-    private String userId;
+    private String sessionId;
+    private String data;
 
     public EnterRoomRequest() {}
 
-    public EnterRoomRequest(String roomId, String userId) {
-        this.roomId = roomId;
-        this.userId = userId;
-    }
-    
-    public String getRoomId() {
-        return this.roomId;
+    public EnterRoomRequest(String sessionId, String data) {
+        this.sessionId = sessionId;
+        this.data = data;
     }
 
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
+    public String getSessionId() {
+        return this.sessionId;
     }
 
-    public String getUserId() {
-        return this.userId;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public String getData() {
+        return this.data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
     }
 }
