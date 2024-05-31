@@ -15,10 +15,12 @@ import com.example.yacht_backend.exception.RoomNotFoundException;
 @Service
 public class RoomService {
     private final RoomDatabaseService roomDatabaseService;
+    private final UserDatabaseService userDatabaseService;
     private final ConcurrentHashMap<String, DeferredResult<String>> roomGuestMap = new ConcurrentHashMap<>();
 
-    RoomService(RoomDatabaseService roomDatabaseService) {
+    RoomService(RoomDatabaseService roomDatabaseService, UserDatabaseService userDatabaseService) {
         this.roomDatabaseService = roomDatabaseService;
+        this.userDatabaseService = userDatabaseService;
     }
 
     public List<Room> getAllRooms() {
