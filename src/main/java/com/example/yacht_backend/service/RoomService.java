@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
-import com.example.yacht_backend.model.Room;
+import com.example.yacht_backend.model.ActiveGames;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.domain.RoomData;
@@ -23,13 +23,13 @@ public class RoomService {
         this.userDatabaseService = userDatabaseService;
     }
 
-    public List<Room> getAllRooms() {
+    public List<ActiveGames> getAllRooms() {
         return roomDatabaseService.findAll();
     }
     
     public CreateNewRoomResponse createNewRoom(String sessionId, String hostData) {
         String userId = userDatabaseService.findUserIdBySessionId(sessionId);
-        Room guestRoom = roomDatabaseService.findRoomByGuestUserId(userId);
+        ActiveGames guestRoom = roomDatabaseService.findRoomByGuestUserId(userId);
         
         if (guestRoom != null) {
             DeferredResult<String> guestId = new DeferredResult<String>(60000L);
@@ -63,7 +63,7 @@ public class RoomService {
                 if (roomData.isOpen()) {
                     roomData.close();
                     if (guestUserId.hasResult()) {
-                        roomDatabaseService.save(new Room(roomId, userId, (String)guestUserId.getResult()));
+                        roomDatabaseService.save(new ActiveGames(roomId, userId, (String)guestUserId.getResult()));
                     }
                     else {
                         guestUserId.setResult(null);

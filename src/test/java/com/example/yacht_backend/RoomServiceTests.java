@@ -10,7 +10,7 @@ import com.example.yacht_backend.service.RoomService;
 import com.example.yacht_backend.service.RoomDatabaseService;
 import com.example.yacht_backend.service.UserDatabaseService;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
-import com.example.yacht_backend.model.Room;
+import com.example.yacht_backend.model.ActiveGames;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
@@ -39,7 +39,7 @@ class RoomServiceTests {
 	void testGetAllRooms() throws Exception {
 		given(roomDatabaseService.findAll()).willReturn(Collections.emptyList());
 
-        List<Room> allRooms = roomService.getAllRooms();
+        List<ActiveGames> allRooms = roomService.getAllRooms();
 
         assertEquals(allRooms, Collections.emptyList());
 	}

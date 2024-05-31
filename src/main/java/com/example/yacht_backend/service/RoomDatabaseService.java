@@ -5,31 +5,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import com.example.yacht_backend.repository.RoomRepository;
+import com.example.yacht_backend.repository.ActiveGamesRepository;
 import com.example.yacht_backend.exception.RoomNotFoundException;
-import com.example.yacht_backend.model.Room;
+import com.example.yacht_backend.model.ActiveGames;
 
 @Service
 public class RoomDatabaseService {
-    private final RoomRepository roomRepository;
+    private final ActiveGamesRepository roomRepository;
 
-    RoomDatabaseService(RoomRepository roomRepository) {
+    RoomDatabaseService(ActiveGamesRepository roomRepository) {
         this.roomRepository = roomRepository;
     }
 
     @Transactional(readOnly=true)
-    public List<Room> findAll() {
+    public List<ActiveGames> findAll() {
         return roomRepository.findAll();
     }
 
     @Transactional
-    public Room save(Room room) {
+    public ActiveGames save(ActiveGames room) {
         return roomRepository.save(room);
     }
     
     @Transactional
-    public Room addGuestUserToRoom(String hostUserId, String guestUserId) throws RoomNotFoundException {
-        Room hostRoom = findRoomByHostUserId(hostUserId);
+    public ActiveGames addGuestUserToRoom(String hostUserId, String guestUserId) throws RoomNotFoundException {
+        ActiveGames hostRoom = findRoomByHostUserId(hostUserId);
         if (hostRoom.getHostUserId() != hostUserId) {
             throw new RoomNotFoundException("invalid room info(host)");
         }
@@ -38,41 +38,41 @@ public class RoomDatabaseService {
     }
 
     @Transactional(readOnly=true)
-    public Room findRoomByHostUserId(String hostUserId) {
+    public ActiveGames findRoomByHostUserId(String hostUserId) {
         if (hostUserId == null) {
             return null;
         }
-        List<Room> hostRooms = roomRepository.findByHostUserId(hostUserId);
+        List<ActiveGames> hostRooms = roomRepository.findByHostUserId(hostUserId);
         if (hostRooms.isEmpty()) {
             return null;
         }
-        Room hostRoom = hostRooms.get(0); 
+        ActiveGames hostRoom = hostRooms.get(0); 
         return hostRoom;
     }
 
     @Transactional(readOnly=true)
-    public Room findRoomByGuestUserId(String guestUserId) {
+    public ActiveGames findRoomByGuestUserId(String guestUserId) {
         if (guestUserId == null) {
             return null;
         }
-        List<Room> guestRooms = roomRepository.findByGuestUserId(guestUserId);
+        List<ActiveGames> guestRooms = roomRepository.findByGuestUserId(guestUserId);
         if (guestRooms.isEmpty()) {
             return null;
         }
-        Room guestRoom = guestRooms.get(0); 
+        ActiveGames guestRoom = guestRooms.get(0); 
         return guestRoom;
     }
 
     @Transactional(readOnly=true)
-    public Room findRoomById(String roomId) {
+    public ActiveGames findRoomById(String roomId) {
         if (roomId == null) {
             return null;
         }
-        List<Room> rooms = roomRepository.findByRoomId(roomId);
+        List<ActiveGames> rooms = roomRepository.findByRoomId(roomId);
         if (rooms.isEmpty()) {
             return null;
         }
-        Room room = rooms.get(0); 
+        ActiveGames room = rooms.get(0); 
         return room;
     }
 
