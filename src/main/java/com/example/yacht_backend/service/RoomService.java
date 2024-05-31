@@ -27,7 +27,7 @@ public class RoomService {
         return roomDatabaseService.findAll();
     }
     
-    public CreateNewRoomResponse createNewRoom(String sessionId) {
+    public CreateNewRoomResponse createNewRoom(String sessionId, String hostData) {
         String userId = userDatabaseService.findUserIdBySessionId(sessionId);
         Room guestRoom = roomDatabaseService.findRoomByGuestUserId(userId);
         
@@ -42,22 +42,26 @@ public class RoomService {
         DeferredResult<String> guestUserId = new DeferredResult<String>(60000L);
         DeferredResult<String> data = new DeferredResult<String>();
         
-        RoomData roomData = new RoomData(roomId, userId, guestUserId, data);
+        RoomData roomData = new RoomData(roomId, userId, hostData, guestUserId, data);
         roomGuestMap.put(roomId, roomData); // TODO: guestId와 data를 가지는 클래스로 변경
 
         // timeout인 경우
         guestUserId.onTimeout(() -> {
             synchronized (roomData) {
+                if(roomData.isValid()) {
+                    roomData.setInvalid();
+                    guestUserId.setResult(null);
+                    data.setResult(null);
+                }
                 roomGuestMap.remove(roomId);
-                guestUserId.setResult(null);
-                data.setResult(null);
             }
         });
 
         // 어떤 이유에서든(네트워크 에러, 클라이언트쪽 timeout 등) 연결이 끊긴 경우 or 처리가 완료된 경우
         guestUserId.onCompletion(() -> {
             synchronized (roomData) {
-                synchronized (guestUserId) {
+                if (roomData.isValid()) {
+                    roomData.setInvalid();
                     if (guestUserId.hasResult()) {
                         roomDatabaseService.save(new Room(roomId, userId, (String)guestUserId.getResult()));
                     }
@@ -65,8 +69,8 @@ public class RoomService {
                         guestUserId.setResult(null);
                         data.setResult(null);
                     }
-                    roomGuestMap.remove(roomId);
                 }
+                roomGuestMap.remove(roomId);
             }
         });
         return new CreateNewRoomResponse(roomId, guestUserId, data);
@@ -84,32 +88,40 @@ public class RoomService {
         }
 
         synchronized (roomData) {
-            String hostUserId = roomData.getHostUserId();
-            DeferredResult<String> guestUserId = roomData.getGuestUserId();
-            DeferredResult<String> data = roomData.getData();
-            if (guestUserId.hasResult()) {
-                return new EnterRoomResponse("Room is full", false);
+            if (roomData.isValid()) {
+                roomData.setInvalid();
+                String hostUserData = roomData.getHostUserData();
+                DeferredResult<String> guestUserId = roomData.getGuestUserId();
+                DeferredResult<String> guestUserData = roomData.getGuestUserData();
+                if (guestUserId.hasResult()) {
+                    return new EnterRoomResponse("Room is full", false);
+                }
+                guestUserId.setResult(userId);
+                guestUserData.setResult(guestData);
+                
+                return new EnterRoomResponse(hostUserData, true);
             }
-            guestUserId.setResult(userId);
-            data.setResult(guestData);
-            
-            return new EnterRoomResponse(hostUserId, true);
+            return new EnterRoomResponse("Room is full", false);
         }
     }
 
     static class RoomData {
         private String roomId;
         private String hostUserId;
+        private String hostUserData;
         private DeferredResult<String> guestUserId;
-        private DeferredResult<String> data;
+        private DeferredResult<String> guestUserData;
+        private boolean valid;
 
         public RoomData() {}
 
-        public RoomData(String roomId, String hostUserId, DeferredResult<String> guestUserId, DeferredResult<String> data) {
+        public RoomData(String roomId, String hostUserId, String hostUserData, DeferredResult<String> guestUserId, DeferredResult<String> guestUserData) {
             this.roomId = roomId;
             this.hostUserId = hostUserId;
+            this.hostUserData = hostUserData;
             this.guestUserId = guestUserId;
-            this.data = data;
+            this.guestUserData = guestUserData;
+            valid = true;
         }
 
         public String getRoomId() {
@@ -128,6 +140,14 @@ public class RoomService {
             this.hostUserId = hostUserId;
         }
 
+        public String getHostUserData() {
+            return this.hostUserData;
+        }
+    
+        public void setHostUserData(String hostUserData) {
+            this.hostUserData = hostUserData;
+        }
+
         public DeferredResult<String> getGuestUserId() {
             return guestUserId;
         }
@@ -136,12 +156,20 @@ public class RoomService {
             this.guestUserId = guestUserId;
         }
 
-        public DeferredResult<String> getData() {
-            return data;
+        public DeferredResult<String> getGuestUserData() {
+            return guestUserData;
         }
 
-        public void setData(DeferredResult<String> data) {
-            this.data = data;
+        public void setGuestUserData(DeferredResult<String> guestUserData) {
+            this.guestUserData = guestUserData;
+        }
+
+        public void setInvalid() {
+            valid = false;
+        }
+
+        public boolean isValid() {
+            return valid;
         }
     }
 }
