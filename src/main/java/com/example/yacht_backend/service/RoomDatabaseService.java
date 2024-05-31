@@ -6,25 +6,34 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import com.example.yacht_backend.repository.ActiveRoomRepository;
+import com.example.yacht_backend.repository.PendingRoomRepository;
 import com.example.yacht_backend.exception.RoomNotFoundException;
 import com.example.yacht_backend.model.ActiveRoom;
+import com.example.yacht_backend.model.PendingRoom;
 
 @Service
 public class RoomDatabaseService {
-    private final ActiveRoomRepository roomRepository;
+    private final ActiveRoomRepository activeRoomRepository;
+    private final PendingRoomRepository pendingRoomRepository;
 
-    RoomDatabaseService(ActiveRoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
+    RoomDatabaseService(ActiveRoomRepository activeRoomRepository, PendingRoomRepository pendingRoomRepository) {
+        this.activeRoomRepository = activeRoomRepository;
+        this.pendingRoomRepository = pendingRoomRepository;
     }
 
     @Transactional(readOnly=true)
     public List<ActiveRoom> findAll() {
-        return roomRepository.findAll();
+        return activeRoomRepository.findAll();
     }
 
     @Transactional
     public ActiveRoom save(ActiveRoom room) {
-        return roomRepository.save(room);
+        return activeRoomRepository.save(room);
+    }
+
+    @Transactional
+    public PendingRoom save(PendingRoom room) {
+        return pendingRoomRepository.save(room);
     }
     
     @Transactional
@@ -34,7 +43,7 @@ public class RoomDatabaseService {
             throw new RoomNotFoundException("invalid room info(host)");
         }
         hostRoom.setGuestUserId(guestUserId);
-        return roomRepository.save(hostRoom);
+        return activeRoomRepository.save(hostRoom);
     }
 
     @Transactional(readOnly=true)
@@ -42,7 +51,7 @@ public class RoomDatabaseService {
         if (hostUserId == null) {
             return null;
         }
-        List<ActiveRoom> hostRooms = roomRepository.findByHostUserId(hostUserId);
+        List<ActiveRoom> hostRooms = activeRoomRepository.findByHostUserId(hostUserId);
         if (hostRooms.isEmpty()) {
             return null;
         }
@@ -55,7 +64,7 @@ public class RoomDatabaseService {
         if (guestUserId == null) {
             return null;
         }
-        List<ActiveRoom> guestRooms = roomRepository.findByGuestUserId(guestUserId);
+        List<ActiveRoom> guestRooms = activeRoomRepository.findByGuestUserId(guestUserId);
         if (guestRooms.isEmpty()) {
             return null;
         }
@@ -68,7 +77,7 @@ public class RoomDatabaseService {
         if (roomId == null) {
             return null;
         }
-        List<ActiveRoom> rooms = roomRepository.findByRoomId(roomId);
+        List<ActiveRoom> rooms = activeRoomRepository.findByRoomId(roomId);
         if (rooms.isEmpty()) {
             return null;
         }
