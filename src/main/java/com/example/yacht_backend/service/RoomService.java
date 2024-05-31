@@ -36,7 +36,7 @@ public class RoomService {
     
     public CreateNewRoomResponse createNewRoom(String sessionId, String hostData) {
         String userId = userDatabaseService.findUserIdBySessionId(sessionId);
-        ActiveRoom guestRoom = roomDatabaseService.findRoomByGuestUserId(userId);
+        ActiveRoom guestRoom = roomDatabaseService.findActiveRoomByGuestUserId(userId);
         
         if (guestRoom != null) {
             DeferredResult<String> guestId = new DeferredResult<String>(deferredResultTimeout);

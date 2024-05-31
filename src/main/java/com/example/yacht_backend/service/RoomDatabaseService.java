@@ -48,7 +48,7 @@ public class RoomDatabaseService {
     
     @Transactional
     public ActiveRoom addGuestUserToRoom(String hostUserId, String guestUserId) throws RoomNotFoundException {
-        ActiveRoom hostRoom = findRoomByHostUserId(hostUserId);
+        ActiveRoom hostRoom = findActiveRoomByHostUserId(hostUserId);
         if (hostRoom.getHostUserId() != hostUserId) {
             throw new RoomNotFoundException("invalid room info(host)");
         }
@@ -57,7 +57,7 @@ public class RoomDatabaseService {
     }
 
     @Transactional(readOnly=true)
-    public ActiveRoom findRoomByHostUserId(String hostUserId) {
+    public ActiveRoom findActiveRoomByHostUserId(String hostUserId) {
         if (hostUserId == null) {
             return null;
         }
@@ -70,7 +70,20 @@ public class RoomDatabaseService {
     }
 
     @Transactional(readOnly=true)
-    public ActiveRoom findRoomByGuestUserId(String guestUserId) {
+    public PendingRoom findPendingRoomByHostUserId(String hostUserId) {
+        if (hostUserId == null) {
+            return null;
+        }
+        List<PendingRoom> hostRooms = pendingRoomRepository.findByHostUserId(hostUserId);
+        if (hostRooms.isEmpty()) {
+            return null;
+        }
+        PendingRoom hostRoom = hostRooms.get(0); 
+        return hostRoom;
+    }
+
+    @Transactional(readOnly=true)
+    public ActiveRoom findActiveRoomByGuestUserId(String guestUserId) {
         if (guestUserId == null) {
             return null;
         }
@@ -83,7 +96,7 @@ public class RoomDatabaseService {
     }
 
     @Transactional(readOnly=true)
-    public ActiveRoom findRoomById(String roomId) {
+    public ActiveRoom findActiveRoomById(String roomId) {
         if (roomId == null) {
             return null;
         }
@@ -96,7 +109,20 @@ public class RoomDatabaseService {
     }
 
     @Transactional(readOnly=true)
+    public PendingRoom findPendingRoomById(String roomId) {
+        if (roomId == null) {
+            return null;
+        }
+        List<PendingRoom> rooms = pendingRoomRepository.findByRoomId(roomId);
+        if (rooms.isEmpty()) {
+            return null;
+        }
+        PendingRoom room = rooms.get(0); 
+        return room;
+    }
+
+    @Transactional(readOnly=true)
     public boolean isUserInRoom(String userId) {
-        return findRoomByHostUserId(userId) != null || findRoomByGuestUserId(userId) != null;
+        return findActiveRoomByHostUserId(userId) != null || findActiveRoomByGuestUserId(userId) != null || findPendingRoomByHostUserId(userId) != null;
     }
 }
