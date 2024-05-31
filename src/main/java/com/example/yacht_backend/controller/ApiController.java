@@ -36,7 +36,6 @@ public class ApiController {
         return userService.createUser();
     }
     
-
     @GetMapping("/rooms")
     public List<Room> getAllRooms() {
         return roomService.getAllRooms();
@@ -49,7 +48,7 @@ public class ApiController {
     
     @PostMapping("/rooms/{roomId}/enter")
     public EnterRoomResponse enterRoom(@PathVariable String roomId, @RequestBody EnterRoomRequest enterRoomRequest) throws Exception {
-        return roomService.enterRoom(roomId, enterRoomRequest.getUserId());
+        return roomService.enterRoom(roomId, enterRoomRequest.getSessionId());
     }
 
     @DeleteMapping("/leave-room")

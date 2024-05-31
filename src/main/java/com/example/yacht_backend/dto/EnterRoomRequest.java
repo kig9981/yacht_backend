@@ -2,19 +2,19 @@ package com.example.yacht_backend.dto;
 
 
 public class EnterRoomRequest {
-    private String userId;
+    private String sessionId;
 
     public EnterRoomRequest() {}
 
-    public EnterRoomRequest(String userId) {
-        this.userId = userId;
+    public EnterRoomRequest(String sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public String getUserId() {
-        return this.userId;
+    public String getSessionId() {
+        return this.sessionId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 }
