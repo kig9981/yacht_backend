@@ -17,12 +17,12 @@ public class UserDatabaseService {
     }
 
     @Transactional
-    User save(User user) {
+    public User save(User user) {
         return userRepository.save(user);
     }
 
     @Transactional(readOnly = true)
-    String findUserIdBySessionId(String sessionId) {
+    public String findUserIdBySessionId(String sessionId) {
         if (sessionId == null) {
             return null;
         }
