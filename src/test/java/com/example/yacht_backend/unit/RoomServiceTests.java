@@ -62,8 +62,7 @@ class RoomServiceTests {
 		mockStatic(UUID.class);
 
 		given(userDatabaseService.findUserIdBySessionId(sessionId)).willReturn(userId);
-		given(roomDatabaseService.findRoomByHostUserId(userId)).willReturn(null);
-		given(roomDatabaseService.findRoomByGuestUserId(userId)).willReturn(null);
+		given(roomDatabaseService.findActiveRoomByGuestUserId(userId)).willReturn(null);
 		given(UUID.randomUUID()).willReturn(roomId);
 
 		CreateNewRoomResponse createNewRoomResponse = roomService.createNewRoom(userId, hostData);

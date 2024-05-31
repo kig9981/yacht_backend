@@ -108,7 +108,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     void handleHostConnection(WebSocketSession session, String hostUserId) throws Exception {
-        if (roomDatabaseService.findRoomByHostUserId(hostUserId) == null) {
+        if (roomDatabaseService.findPendingRoomByHostUserId(hostUserId) == null) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
@@ -120,7 +120,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     void handleGuestConnection(WebSocketSession session, String hostUserId, String guestUserId) throws Exception {
-        if (roomDatabaseService.findRoomByHostUserId(hostUserId) == null) {
+        if (roomDatabaseService.findPendingRoomByHostUserId(hostUserId) == null) {
             session.close(CloseStatus.SERVER_ERROR);
             return;
         }
