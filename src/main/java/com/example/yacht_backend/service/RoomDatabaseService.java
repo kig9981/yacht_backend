@@ -35,6 +35,16 @@ public class RoomDatabaseService {
     public PendingRoom save(PendingRoom room) {
         return pendingRoomRepository.save(room);
     }
+
+    @Transactional
+    public void delete(ActiveRoom room) {
+        activeRoomRepository.delete(room);
+    }
+
+    @Transactional
+    public void delete(PendingRoom room) {
+        pendingRoomRepository.delete(room);
+    }
     
     @Transactional
     public ActiveRoom addGuestUserToRoom(String hostUserId, String guestUserId) throws RoomNotFoundException {
