@@ -1,15 +1,13 @@
 package com.example.yacht_backend.dto;
 
-import org.springframework.web.context.request.async.DeferredResult;
-
 public class CreateNewRoomResponse {
     private String roomId;
-    private DeferredResult<String> guestUserId;
-    private DeferredResult<String> data;
+    private String guestUserId;
+    private String data;
 
     public CreateNewRoomResponse() {}
 
-    public CreateNewRoomResponse(String roomId, DeferredResult<String> guestUserId, DeferredResult<String> data) {
+    public CreateNewRoomResponse(String roomId, String guestUserId, String data) {
         this.roomId = roomId;
         this.guestUserId = guestUserId;
         this.data = data;
@@ -23,19 +21,19 @@ public class CreateNewRoomResponse {
         this.roomId = roomId;
     }
 
-    public DeferredResult<String> getGuestUserId() {
+    public String getGuestUserId() {
         return this.guestUserId;
     }
 
-    public void setGuestUserId(DeferredResult<String> guestUserId) {
+    public void setGuestUserId(String guestUserId) {
         this.guestUserId = guestUserId;
     }
 
-    public DeferredResult<String> getData() {
+    public String getData() {
         return this.data;
     }
 
-    public void setData(DeferredResult<String> data) {
+    public void setData(String data) {
         this.data = data;
     }
 }
