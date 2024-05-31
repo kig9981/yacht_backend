@@ -9,7 +9,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 import com.example.yacht_backend.model.Room;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.dto.EnterRoomResponse;
-import com.example.yacht_backend.exception.RoomNotFoundException;
 
 
 @Service
@@ -43,7 +42,7 @@ public class RoomService {
         DeferredResult<String> data = new DeferredResult<String>();
         
         RoomData roomData = new RoomData(roomId, userId, hostData, guestUserId, data);
-        roomGuestMap.put(roomId, roomData); // TODO: guestId와 data를 가지는 클래스로 변경
+        roomGuestMap.put(roomId, roomData);
 
         // timeout인 경우
         guestUserId.onTimeout(() -> {
