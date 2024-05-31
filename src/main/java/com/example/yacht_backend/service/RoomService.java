@@ -17,11 +17,12 @@ import com.example.yacht_backend.domain.RoomData;
 public class RoomService {
     private final RoomDatabaseService roomDatabaseService;
     private final UserDatabaseService userDatabaseService;
-    private final ConcurrentHashMap<String, RoomData> roomGuestMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, RoomData> roomGuestMap;
 
-    RoomService(RoomDatabaseService roomDatabaseService, UserDatabaseService userDatabaseService) {
+    RoomService(RoomDatabaseService roomDatabaseService, UserDatabaseService userDatabaseService, ConcurrentHashMap<String, RoomData> roomGuestMap) {
         this.roomDatabaseService = roomDatabaseService;
         this.userDatabaseService = userDatabaseService;
+        this.roomGuestMap = roomGuestMap;
     }
 
     public List<PendingRoom> getAllRooms() {
@@ -95,7 +96,7 @@ public class RoomService {
         synchronized (roomData) {
             if (roomData.isOpen()) {
                 roomData.close();
-                String hostUserId = roomData.getHostUserData();
+                String hostUserId = roomData.getHostUserId();
                 DeferredResult<String> guestUserId = roomData.getGuestUserId();
                 DeferredResult<String> guestUserData = roomData.getGuestUserData();
                 if (guestUserId.hasResult()) {
