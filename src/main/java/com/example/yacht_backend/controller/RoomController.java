@@ -14,6 +14,7 @@ import com.example.yacht_backend.dto.CreateNewRoomResponse;
 import com.example.yacht_backend.dto.EnterRoomRequest;
 import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.model.ActiveRoom;
+import com.example.yacht_backend.model.PendingRoom;
 import com.example.yacht_backend.service.RoomService;
 
 @RestController
@@ -26,7 +27,7 @@ public class RoomController {
     }
 
     @GetMapping
-    public List<ActiveRoom> getAllRooms() {
+    public List<PendingRoom> getAllRooms() {
         return roomService.getAllRooms();
     }
 
