@@ -1,4 +1,4 @@
-package com.example.yacht_backend;
+package com.example.yacht_backend.unit;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +9,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.yacht_backend.dto.CreateNewRoomRequest;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
+import com.example.yacht_backend.dto.EnterRoomRequest;
+import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.service.RoomService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -46,8 +48,8 @@ class RoomControllerTests {
 			.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$").isArray())
-			.andExpect(jsonPath("$").isEmpty())
-			.andDo(print());
+			.andExpect(jsonPath("$").isEmpty());
+			// .andDo(print());
 	}
 
 	@Test
@@ -55,21 +57,38 @@ class RoomControllerTests {
 		UUID userId = UUID.randomUUID();
 		UUID roomId = UUID.randomUUID();
 		UUID guestId = UUID.randomUUID();
-		DeferredResult<String> deferredGuestId = new DeferredResult<>();
-		DeferredResult<String> deferredData = new DeferredResult<>();
-		deferredGuestId.setResult(guestId.toString());
-		deferredData.setResult("data");
 		CreateNewRoomRequest createNewRoomRequest = new CreateNewRoomRequest(userId.toString(), "data");
-		CreateNewRoomResponse createNewRoomResponse = new CreateNewRoomResponse(roomId.toString(), deferredGuestId, deferredData);
-		given(roomService.createNewRoom(createNewRoomRequest.getSessionId(), "data")).willReturn(createNewRoomResponse);
+		CreateNewRoomResponse createNewRoomResponse = new CreateNewRoomResponse(roomId.toString(), roomId.toString(), guestId.toString());
+		DeferredResult<CreateNewRoomResponse> response = new DeferredResult<>();
+
+		given(roomService.createNewRoom(createNewRoomRequest.getSessionId(), "data")).willReturn(response);
 
 		mockMvc.perform(post("/rooms/wait")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(createNewRoomRequest)))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.roomId").value(roomId.toString()))
-			.andDo(print());
+			.andExpect(status().isOk());
+			// .andDo(print());
 			
+	}
+
+	@Test
+	void testEnterRoom() throws Exception {
+		UUID roomId = UUID.randomUUID();
+		UUID sessionId = UUID.randomUUID();
+		UUID userId = UUID.randomUUID();
+		EnterRoomRequest enterRoomRequest = new EnterRoomRequest(sessionId.toString(), "data");
+		EnterRoomResponse enterRoomResponse = new EnterRoomResponse("", true);
+
+		given(roomService.enterRoom(roomId.toString(), sessionId.toString(), "data")).willReturn(enterRoomResponse);
+
+		mockMvc.perform(post("/rooms/" + roomId.toString() + "/enter")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(enterRoomRequest)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.isAccepted").value(true))
+			.andExpect(jsonPath("$.response").value(""));
+			// .andDo(print());
+
 	}
 
 }

@@ -9,17 +9,18 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 
 @Entity
-@Table(name = "id_uniqueness_check", uniqueConstraints = {
+@Table(name = "pending_room_id_uniqueness_check", uniqueConstraints = {
     @UniqueConstraint(columnNames = "roomId"),
     @UniqueConstraint(columnNames = "hostUserId")
 })
 public class PendingRoom {
     private @Id
     @GeneratedValue Long id;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String roomId;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String hostUserId;
+    @Column(nullable = false)
     private String hostUserData;
 
     @Version

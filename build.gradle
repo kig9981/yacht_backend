@@ -28,3 +28,30 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+test {
+    testLogging {
+        events "PASSED", "SKIPPED", "FAILED"
+
+        exceptionFormat "full" // 에러 메시지의 전체 스택 트레이스를 출력합니다.
+
+        showExceptions true // 예외를 출력합니다.
+        showCauses true // 예외의 원인을 출력합니다.
+        showStackTraces true // 스택 트레이스를 출력합니다.
+
+        // 콘솔에 각 테스트의 시작과 끝을 출력합니다.
+        showStandardStreams = true
+
+        // 모든 테스트 결과를 출력합니다.
+        afterSuite { desc, result ->
+            if (!desc.parent) { // only output summary for the entire suite
+                def output = "Test result: ${result.resultType} " +
+                        "(${result.testCount} tests, " +
+                        "${result.successfulTestCount} successes, " +
+                        "${result.failedTestCount} failures, " +
+                        "${result.skippedTestCount} skipped)"
+                println output
+            }
+        }
+    }
+}

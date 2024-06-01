@@ -1,4 +1,4 @@
-package com.example.yacht_backend;
+package com.example.yacht_backend.unit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,20 +6,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import org.springframework.web.context.request.async.DeferredResult;
+
 import com.example.yacht_backend.service.RoomService;
 import com.example.yacht_backend.service.RoomDatabaseService;
 import com.example.yacht_backend.service.UserDatabaseService;
+import com.example.yacht_backend.domain.RoomData;
 import com.example.yacht_backend.dto.CreateNewRoomResponse;
-import com.example.yacht_backend.model.ActiveRoom;
+import com.example.yacht_backend.dto.EnterRoomResponse;
 import com.example.yacht_backend.model.PendingRoom;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 
 import java.util.List;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 class RoomServiceTests {
 	@InjectMocks
@@ -30,6 +35,9 @@ class RoomServiceTests {
 
 	@Mock
     private UserDatabaseService userDatabaseService;
+
+	@Mock
+	private ConcurrentHashMap<String, RoomData> roomGuestMap;
 
     @BeforeEach
     void initialize() {
@@ -42,7 +50,7 @@ class RoomServiceTests {
 
         List<PendingRoom> allRooms = roomService.getAllRooms();
 
-        assertEquals(allRooms, Collections.emptyList());
+        assertEquals(Collections.emptyList(), allRooms);
 	}
 
 	@Test
@@ -55,13 +63,30 @@ class RoomServiceTests {
 		mockStatic(UUID.class);
 
 		given(userDatabaseService.findUserIdBySessionId(sessionId)).willReturn(userId);
-		given(roomDatabaseService.findRoomByHostUserId(userId)).willReturn(null);
-		given(roomDatabaseService.findRoomByGuestUserId(userId)).willReturn(null);
+		given(roomDatabaseService.findActiveRoomByGuestUserId(userId)).willReturn(null);
 		given(UUID.randomUUID()).willReturn(roomId);
+		given(roomGuestMap.put(any(String.class), any(RoomData.class))).willReturn(null);
 
-		CreateNewRoomResponse createNewRoomResponse = roomService.createNewRoom(userId, hostData);
+		DeferredResult<CreateNewRoomResponse> createNewRoomResponse = roomService.createNewRoom(userId, hostData);
+	}
 
-		assertEquals(createNewRoomResponse.getRoomId(), roomId.toString());
+	@Test
+	void testEnterRoom() throws Exception {
+		String roomId = UUID.randomUUID().toString();
+		String sessionId = UUID.randomUUID().toString();
+		String hostUserId = UUID.randomUUID().toString();
+		String guestUserId = UUID.randomUUID().toString();
+		DeferredResult<CreateNewRoomResponse> deferredResult = new DeferredResult<>();
+		RoomData roomData = new RoomData(roomId, hostUserId, "hostUserData", deferredResult);
+
+		given(userDatabaseService.findUserIdBySessionId(sessionId)).willReturn(guestUserId);
+		given(roomDatabaseService.isUserInRoom(guestUserId)).willReturn(false);
+		given(roomGuestMap.get(roomId)).willReturn(roomData);
+
+		EnterRoomResponse enterRoomResponse = roomService.enterRoom(roomId, sessionId, "guestData");
+		
+		assertEquals(hostUserId, enterRoomResponse.getResponse());
+		assertEquals(true, enterRoomResponse.getIsAccepted());
 	}
 
 }
