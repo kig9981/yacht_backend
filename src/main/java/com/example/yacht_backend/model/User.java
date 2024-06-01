@@ -9,7 +9,7 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 
 @Entity
-@Table(name = "id_uniqueness_check", uniqueConstraints = {
+@Table(name = "user_id_uniqueness_check", uniqueConstraints = {
     @UniqueConstraint(columnNames = "userId"),
     @UniqueConstraint(columnNames = "sessionId")
 })
