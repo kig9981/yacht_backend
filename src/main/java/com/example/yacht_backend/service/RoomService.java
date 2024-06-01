@@ -73,6 +73,17 @@ public class RoomService {
             }
         });
 
+        createNewRoomResponse.onError((Throwable t) -> {
+            synchronized (roomData) {
+                if(roomData.isOpen()) {
+                    roomData.close();
+                    createNewRoomResponse.setResult(new CreateNewRoomResponse(null, null, null));
+                }
+                roomGuestMap.remove(roomId);
+                roomDatabaseService.delete(pendingRoom);
+            }
+        });
+
         // 어떤 이유에서든(네트워크 에러, 클라이언트쪽 timeout 등) 연결이 끊긴 경우 or 처리가 완료된 경우
         createNewRoomResponse.onCompletion(() -> {
             if (onCompletion) {
