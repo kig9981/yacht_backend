@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 import com.example.yacht_backend.model.ActiveRoom;
@@ -15,6 +17,7 @@ import com.example.yacht_backend.domain.RoomData;
 
 @Service
 public class RoomService {
+    private static final Logger logger = LoggerFactory.getLogger(RoomService.class);
     private final RoomDatabaseService roomDatabaseService;
     private final UserDatabaseService userDatabaseService;
     private final ConcurrentHashMap<String, RoomData> roomGuestMap;
@@ -36,10 +39,12 @@ public class RoomService {
     }
 
     public List<PendingRoom> getAllRooms() {
+        logger.info("RoomService.getAllRooms 실행");
         return roomDatabaseService.findAllPendingRoom();
     }
     
     public DeferredResult<CreateNewRoomResponse> createNewRoom(String sessionId, String hostData) {
+        logger.info("RoomService.createNewRoom 실행");
         String userId = userDatabaseService.findUserIdBySessionId(sessionId);
         ActiveRoom guestRoom = roomDatabaseService.findActiveRoomByGuestUserId(userId);
         
@@ -91,6 +96,7 @@ public class RoomService {
     }
 
     public EnterRoomResponse enterRoom(String roomId, String sessionId, String guestData) {
+        logger.info("RoomService.enterRoom 실행");
         String userId = userDatabaseService.findUserIdBySessionId(sessionId);
         if(roomDatabaseService.isUserInRoom(userId)) {
             return new EnterRoomResponse("Already in room", false);
