@@ -1,0 +1,6 @@
+[submodule "A/A"]
+	path = A/A
+	url = https://github.com/kig9981/nonogram
+[submodule "B/B"]
+	path = B/B
+	url = https://github.com/kig9981/nonogram
